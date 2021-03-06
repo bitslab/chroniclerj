@@ -1,13 +1,8 @@
 
 package edu.columbia.cs.psl.chroniclerj;
 
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
-import java.io.FileWriter;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.ObjectOutputStream;
+import java.io.*;
+import java.net.*;
 import java.util.ArrayList;
 import java.util.jar.Attributes;
 import java.util.jar.JarEntry;
@@ -19,6 +14,7 @@ import com.thoughtworks.xstream.XStream;
 import edu.columbia.cs.psl.chroniclerj.xstream.StaticReflectionProvider;
 
 public class ChroniclerJExportRunner extends Thread {
+    private static Socket socket;
 
     private static String mainClass = "";
 
@@ -28,7 +24,56 @@ public class ChroniclerJExportRunner extends Thread {
 
     private static ArrayList<String> otherLogs = new ArrayList<>();
 
+    public static void writeToCoordinator(int integer) {
+        try {
+            DataOutputStream data = new DataOutputStream(socket.getOutputStream());
+            data.writeInt(integer);
+            data.flush();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+    private static boolean connect() {
+        //Method to establish a connection to Coordinator
+        //Spins until connection is successful and Coordinator returns READY signal
+        while (true) {
+            try {
+                socket = new Socket("localhost", 1234);
+                BufferedReader in = new BufferedReader(new InputStreamReader(socket.getInputStream()));
+                String ready = new String("READY");
+                String input = in.readLine();
+                while (!input.equals("READY")) {
+                    try {
+                        Thread.sleep(100);
+                        input = in.readLine();
+                    } catch (InterruptedException ie) {
+                        return false;
+                    }
+                }
+                return true;
+            } catch (IOException e) {
+                try {
+                    Thread.sleep(100);
+                } catch (InterruptedException ie) {
+                    return false;
+                }
+            }
+        }
+    }
+
     public static void logMain(String main, String[] args) {
+        /*
+        Seems that the first thing any instrumented code does is call logMain
+        logMain -> First wait until connection and READY signal received from Coordinator then proceed as before
+        if connection fails for any reason keep trying
+        *//*
+        FUTURE CONSIDERATION -> make the change to the Instrumenter
+        Instrumenter -> adds a method to instrumented code which will connect to coordinator
+        */
+        boolean connected = false;
+        while (!connected) {
+            connected = connect();
+        }
         CloningUtils.init();
         mainClass = main;
         mainArgs = new String[args.length];
@@ -46,7 +91,7 @@ public class ChroniclerJExportRunner extends Thread {
         exportSerializable();
         try {
         	hasLoggedError = true;
-            File logFile = new File((nameOverride == null ? name : nameOverride));
+            File logFile = new File(System.getProperty("user.dir") + File.separator + (nameOverride == null ? name : nameOverride));
             if(!logFile.getParentFile().exists())
             	logFile.getParentFile().mkdirs();
             if(logFile.exists())

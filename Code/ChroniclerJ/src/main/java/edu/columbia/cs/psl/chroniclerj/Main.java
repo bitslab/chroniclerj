@@ -1,6 +1,7 @@
 
 package edu.columbia.cs.psl.chroniclerj;
 
+import edu.columbia.cs.psl.chroniclerj.coordinate.Coordinator;
 import edu.columbia.cs.psl.chroniclerj.replay.ReplayRunner;
 import edu.columbia.cs.psl.chroniclerj.replay.Replayer;
 
@@ -44,6 +45,15 @@ public class Main {
                 classpath[i] = args[i];
             }
             ReplayRunner._main(classpath);
+        } else if (args[0].equals("-coordinator")) {
+            String[] classpath = new String[3];
+            classpath[0] = System.getProperty("user.dir");
+            classpath[2] = args[1];
+            Coordinator._main(classpath);
+        } else if (args[0].equals("-temp")) {
+            ReplayRunner.connect();
+            System.out.println("Done");
+            System.exit(0);
         } else {
             System.err
                     .println("Usage: java -jar chroniclerj.jar -instrument [source] [dest-deploy] [dest-replay] {additional-classpath-entries}");

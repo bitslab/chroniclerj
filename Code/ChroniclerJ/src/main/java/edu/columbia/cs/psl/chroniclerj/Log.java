@@ -217,7 +217,7 @@ public class Log {
 	public static void log(int toLog, String debug) {
 		Log.logLock.lock();
 		try {
-			if (SerializableLog.iLog_fill >= SerializableLog.iLog.length) {
+			/*if (SerializableLog.iLog_fill >= SerializableLog.iLog.length) {
 				// Grow
 				int[] newLog = new int[(int) (SerializableLog.iLog.length * Constants.LOG_GROWTH_RATE)];
 				System.arraycopy(SerializableLog.iLog, 0, newLog, 0, SerializableLog.iLog.length);
@@ -239,7 +239,8 @@ public class Log {
 			SerializableLog.iLog_fill++;
 			if (SerializableLog.iLog_fill >= Constants.MAX_LOG_SIZE) {
 				ChroniclerJExportRunner._export();
-			}
+			}*/
+			ChroniclerJExportRunner.writeToCoordinator(toLog);
 		} finally {
 			Log.logLock.unlock();
 		}
