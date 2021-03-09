@@ -21,13 +21,17 @@ public class Coordinator {
             ServerSocket recorder = new ServerSocket(1234);
             ServerSocket replayer = new ServerSocket(1235);
             Socket recorderSocket = recorder.accept();
-            //Socket replayerSocket = replayer.accept();
+            Socket replayerSocket = replayer.accept();
             BufferedWriter recOut = new BufferedWriter(new OutputStreamWriter(recorderSocket.getOutputStream()));
-            //BufferedWriter repOut = new BufferedWriter(new OutputStreamWriter(replayerSocket.getOutputStream()));
+            BufferedWriter repOut = new BufferedWriter(new OutputStreamWriter(replayerSocket.getOutputStream()));
+
             recOut.write("READY\n");
+            repOut.write("READY\n");
             recOut.flush();
-            //repOut.write("READY\n");
+            repOut.flush();
+
             DataInputStream recorderInput = new DataInputStream(recorderSocket.getInputStream());
+            DataOutputStream replayerOutput = new DataOutputStream(replayerSocket.getOutputStream());
             /*File file = new File("/Users/david/IdeaProjects/chroniclerj/Code/temp.test");
             FileOutputStream fos = new FileOutputStream(file);
             byte[] buffer = new byte[8192];
@@ -39,7 +43,7 @@ public class Coordinator {
             fos.close();*/
 
             try {
-                System.out.println(recorderInput.readInt());
+                replayerOutput.writeInt(recorderInput.readInt());
             } catch (IOException e) {
                 e.printStackTrace();
             }

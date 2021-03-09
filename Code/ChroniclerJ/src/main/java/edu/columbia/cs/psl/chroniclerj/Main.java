@@ -51,7 +51,7 @@ public class Main {
             classpath[2] = args[1];
             Coordinator._main(classpath);
         } else if (args[0].equals("-temp")) {
-            ReplayRunner.connect();
+            //ReplayRunner.connect();
             System.out.println("Done");
             System.exit(0);
         } else {

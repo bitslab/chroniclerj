@@ -41,20 +41,22 @@ public class NonDeterministicReplayMethodVisitor extends InstructionAdapter impl
         super.visitCode();
         if (constructor) {
 //            if (am != null && am.isCallsNDMethods()) {
-                super.visitVarInsn(ALOAD, 0);
-                super.visitFieldInsn(Opcodes.GETSTATIC, "edu/columbia/cs/psl/chroniclerj/Log",
-                        Instrumenter.FIELD_LOGICAL_CLOCK, "J");
-                super.visitInsn(DUP2_X1);
-                super.visitFieldInsn(Opcodes.PUTFIELD, this.classDesc,
-                        Instrumenter.FIELD_LOGICAL_CLOCK, "J");
-                super.visitInsn(LCONST_1);
-                super.visitInsn(LADD);
-                super.visitFieldInsn(Opcodes.PUTSTATIC, "edu/columbia/cs/psl/chroniclerj/Log",
-                        Instrumenter.FIELD_LOGICAL_CLOCK, "J");
+            super.visitVarInsn(ALOAD, 0);
+            super.visitFieldInsn(Opcodes.GETSTATIC, "edu/columbia/cs/psl/chroniclerj/Log",
+                    Instrumenter.FIELD_LOGICAL_CLOCK, "J");
+            super.visitInsn(DUP2_X1);
+            super.visitFieldInsn(Opcodes.PUTFIELD, this.classDesc,
+                    Instrumenter.FIELD_LOGICAL_CLOCK, "J");
+            super.visitInsn(LCONST_1);
+            super.visitInsn(LADD);
+            super.visitFieldInsn(Opcodes.PUTSTATIC, "edu/columbia/cs/psl/chroniclerj/Log",
+                    Instrumenter.FIELD_LOGICAL_CLOCK, "J");
 //            }
         }
-        if (!constructor)
+        if (!constructor) {
+            super.visitMethodInsn(Opcodes.INVOKESTATIC, Type.getInternalName(ReplayUtils.class), "connect", "()V", false);
             superInitialized = true;
+        }
     }
 
     private boolean isFirstConstructor;

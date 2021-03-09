@@ -133,29 +133,6 @@ public class ReplayRunner {
 
         _loadNextLog(Type.getDescriptor(ExportedLog.class));
     }
-    public static void connect() {
-        Socket socket;
-        while (true) {
-            try {
-                socket = new Socket("localhost", 1235);
-                BufferedReader in = new BufferedReader(new InputStreamReader(socket.getInputStream()));
-                while (in.readLine() != "READY") {
-                    try {
-                        Thread.sleep(100);
-                    } catch (InterruptedException ie) {
-                        ie.printStackTrace();
-                    }
-                }
-                break;
-            } catch (IOException e) {
-                try {
-                    Thread.sleep(100);
-                } catch (InterruptedException ie) {
-                    ie.printStackTrace();
-                }
-            }
-        }
-    }
     public static void _main(String[] classpath) {
         setupLogs(classpath);
         ReplayUtils.checkForDispatch();

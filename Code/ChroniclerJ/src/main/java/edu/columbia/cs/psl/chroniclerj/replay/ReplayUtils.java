@@ -1,5 +1,10 @@
 package edu.columbia.cs.psl.chroniclerj.replay;
 
+import java.io.BufferedReader;
+import java.io.DataInputStream;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.net.Socket;
 import java.util.HashMap;
 
 import edu.columbia.cs.psl.chroniclerj.CallbackInvocation;
@@ -103,19 +108,51 @@ public class ReplayUtils {
 		}
 	}
 
+	private static Socket socket;
+	public static void connect() {
+		while (true) {
+			try {
+				socket = new Socket("localhost", 1235);
+				BufferedReader in = new BufferedReader(new InputStreamReader(socket.getInputStream()));
+				String input = in.readLine();
+				while (!input.equals("READY")) {
+					try {
+						Thread.sleep(100);
+						input = in.readLine();
+					} catch (InterruptedException ie) {
+						ie.printStackTrace();
+					}
+				}
+				break;
+			} catch (IOException e) {
+				try {
+					Thread.sleep(100);
+				} catch (InterruptedException ie) {
+					ie.printStackTrace();
+				}
+			}
+		}
+	}
+
 	public static int getNextI() {
 		Log.logLock.lock();
+		int data = 0;
 		try {
-			int idx = ReplayUtils.getNextIndex(ExportedSerializableLog.iLog_replayIndex, ExportedSerializableLog.iLog_owners, ExportedSerializableLog.iLog_fill);
+			/*int idx = ReplayUtils.getNextIndex(ExportedSerializableLog.iLog_replayIndex, ExportedSerializableLog.iLog_owners, ExportedSerializableLog.iLog_fill);
 			while (idx < 0) {
 				ReplayRunner.loadNextLog("edu/columbia/cs/psl/chroniclerj/ExportedSerializableLog");
 				idx = ReplayUtils.getNextIndex(ExportedSerializableLog.iLog_replayIndex, ExportedSerializableLog.iLog_owners, ExportedSerializableLog.iLog_fill);
 			}
 			ExportedLog.globalReplayIndex++;
-			return ExportedSerializableLog.iLog[idx];
+			return ExportedSerializableLog.iLog[idx];*/
+			DataInputStream socketInput = new DataInputStream(socket.getInputStream());
+			data = socketInput.readInt();
+		} catch (IOException e) {
+			e.printStackTrace();
 		} finally {
 			Log.logLock.unlock();
 		}
+		return data;
 	}
 
 	public static float getNextF() {

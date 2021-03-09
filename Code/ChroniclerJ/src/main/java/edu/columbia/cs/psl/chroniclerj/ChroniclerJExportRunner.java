@@ -33,29 +33,28 @@ public class ChroniclerJExportRunner extends Thread {
             e.printStackTrace();
         }
     }
-    private static boolean connect() {
+    public static void connect() {
         //Method to establish a connection to Coordinator
         //Spins until connection is successful and Coordinator returns READY signal
         while (true) {
             try {
                 socket = new Socket("localhost", 1234);
                 BufferedReader in = new BufferedReader(new InputStreamReader(socket.getInputStream()));
-                String ready = new String("READY");
                 String input = in.readLine();
                 while (!input.equals("READY")) {
                     try {
                         Thread.sleep(100);
                         input = in.readLine();
                     } catch (InterruptedException ie) {
-                        return false;
+                        ie.printStackTrace();
                     }
                 }
-                return true;
+                break;
             } catch (IOException e) {
                 try {
                     Thread.sleep(100);
                 } catch (InterruptedException ie) {
-                    return false;
+                    ie.printStackTrace();
                 }
             }
         }
@@ -70,10 +69,6 @@ public class ChroniclerJExportRunner extends Thread {
         FUTURE CONSIDERATION -> make the change to the Instrumenter
         Instrumenter -> adds a method to instrumented code which will connect to coordinator
         */
-        boolean connected = false;
-        while (!connected) {
-            connected = connect();
-        }
         CloningUtils.init();
         mainClass = main;
         mainArgs = new String[args.length];
