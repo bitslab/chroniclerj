@@ -14,7 +14,8 @@ import com.thoughtworks.xstream.XStream;
 import edu.columbia.cs.psl.chroniclerj.xstream.StaticReflectionProvider;
 
 public class ChroniclerJExportRunner extends Thread {
-    private static Socket socket;
+    public static Socket socket;
+    public static ObjectOutputStream data;
 
     private static String mainClass = "";
 
@@ -26,8 +27,8 @@ public class ChroniclerJExportRunner extends Thread {
 
     public static void writeToCoordinator(int integer) {
         try {
-            DataOutputStream data = new DataOutputStream(socket.getOutputStream());
-            data.writeInt(integer);
+            data.writeObject(integer);
+            data.writeObject("INT");
             data.flush();
         } catch (IOException e) {
             e.printStackTrace();
@@ -39,6 +40,7 @@ public class ChroniclerJExportRunner extends Thread {
         while (true) {
             try {
                 socket = new Socket("localhost", 1234);
+                data = new ObjectOutputStream(socket.getOutputStream());
                 BufferedReader in = new BufferedReader(new InputStreamReader(socket.getInputStream()));
                 String input = in.readLine();
                 while (!input.equals("READY")) {

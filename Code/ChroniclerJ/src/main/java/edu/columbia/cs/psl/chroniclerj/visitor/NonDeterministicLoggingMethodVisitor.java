@@ -35,6 +35,8 @@ public class NonDeterministicLoggingMethodVisitor extends CloningAdviceAdapter {
 
     private boolean isStatic;
 
+    private boolean isAbstract;
+
     private boolean constructor;
 
     private boolean superInitialized;
@@ -71,9 +73,16 @@ public class NonDeterministicLoggingMethodVisitor extends CloningAdviceAdapter {
                 .add("java/util/Properties.keys()Ljava/util/Enumeration;org/apache/geronimo/axis/client/GenericServiceEndpoint.createCall");
     }
 
+    private Label skip;
+
     @Override
     public void visitCode() {
         super.visitCode();
+        if (!this.isAbstract && !"<clinit>".equals(name)) {
+            skip = new Label();
+            super.visitInsn(ICONST_1);
+            super.visitJumpInsn(IFEQ, skip);
+        }
         if (!constructor)
             superInitialized = true;
     }
@@ -89,6 +98,7 @@ public class NonDeterministicLoggingMethodVisitor extends CloningAdviceAdapter {
         this.analyzer = analyzer;
         this.superName = superName;
         this.isStatic = (access & Opcodes.ACC_STATIC) != 0;
+        this.isAbstract = (access & Opcodes.ACC_ABSTRACT) != 0;
         this.constructor = "<init>".equals(name);
         this.isFirstConstructor = isFirstConstructor;
     }
@@ -100,8 +110,21 @@ public class NonDeterministicLoggingMethodVisitor extends CloningAdviceAdapter {
     }
 
     @Override
+    public void visitMaxs(int stack, int locals) {
+        if (stack < 2) stack = 2;
+        super.visitMaxs(stack, locals);
+    }
+
+    @Override
     public void visitEnd() {
         // System.out.println(classDesc + " " + name);
+        if (!this.isAbstract && !"<clinit>".equals(name)) {
+            super.visitLabel(skip);
+            mv.visitTypeInsn(NEW, "java/lang/Error");
+            mv.visitInsn(DUP);
+            mv.visitMethodInsn(INVOKESPECIAL, "java/lang/Error", "<init>", "()V", false);
+            mv.visitInsn(ATHROW);
+        }
         super.visitEnd();
 
         parent.addFieldMarkup(methodCallsToClear);
@@ -124,6 +147,11 @@ public class NonDeterministicLoggingMethodVisitor extends CloningAdviceAdapter {
             MethodCall m = new MethodCall(this.name, this.desc, this.className, pc, lineNumber,
                     owner, name, desc, isStatic);
             Type returnType = Type.getMethodType(desc).getReturnType();
+            if (owner.contains("FileInputStream") && name.contains("read")) {
+                visitFieldInsn(Opcodes.GETSTATIC, "java/lang/System", "out", "Ljava/io/PrintStream;");
+                visitLdcInsn("GOT IT!");
+                visitMethodInsn(Opcodes.INVOKEVIRTUAL, "java/io/PrintStream", "println", "(Ljava/lang/String;)V", false);
+            }
             if ((!constructor || isFirstConstructor || superInitialized)
                     && !returnType.equals(Type.VOID_TYPE)
                     && nonDeterministicMethods.contains(owner + "." + name + ":" + desc)
@@ -137,7 +165,6 @@ public class NonDeterministicLoggingMethodVisitor extends CloningAdviceAdapter {
                     if (t.getSort() == Type.ARRAY && !name.contains("write")
                             && !name.contains("invoke"))
                         hasArray = true;
-
                 if (hasArray) { // TODO uncomment this block
                     captureMethodsToGenerate.put(m, new MethodInsnNode(opcode, owner, name, desc, itfc));
                     String captureDesc = desc;
@@ -187,6 +214,7 @@ public class NonDeterministicLoggingMethodVisitor extends CloningAdviceAdapter {
 
             if (constructor && !init) {
                 init = true;
+                super.visitMethodInsn(Opcodes.INVOKESTATIC, "java/lang/System", "println", "()V");
 //                AnnotatedMethod am = Instrumenter.getAnnotatedMethod(this.classDesc, "finalize",
 //                        "()V");
 //                if (am != null && am.isCallsNDMethods()) {

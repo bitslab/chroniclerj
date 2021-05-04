@@ -1,9 +1,6 @@
 package edu.columbia.cs.psl.chroniclerj.replay;
 
-import java.io.BufferedReader;
-import java.io.DataInputStream;
-import java.io.IOException;
-import java.io.InputStreamReader;
+import java.io.*;
 import java.net.Socket;
 import java.util.HashMap;
 
@@ -145,9 +142,9 @@ public class ReplayUtils {
 			}
 			ExportedLog.globalReplayIndex++;
 			return ExportedSerializableLog.iLog[idx];*/
-			DataInputStream socketInput = new DataInputStream(socket.getInputStream());
-			data = socketInput.readInt();
-		} catch (IOException e) {
+			ObjectInputStream socketInput = new ObjectInputStream(socket.getInputStream());
+			data = (int) socketInput.readObject();
+		} catch (IOException | ClassNotFoundException e) {
 			e.printStackTrace();
 		} finally {
 			Log.logLock.unlock();

@@ -4,7 +4,7 @@ import edu.columbia.cs.psl.chroniclerj.replay.ReplayRunner;
 import java.io.*;
 import java.net.ServerSocket;
 import java.net.Socket;
-import java.util.Arrays;
+import java.util.IdentityHashMap;
 
 public class Coordinator {
 
@@ -16,42 +16,42 @@ public class Coordinator {
     static volatile boolean replayerStatus = false;
      */
 
-    public static void _main(String[] classpath) {
+    static IdentityHashMap<Integer, Object> idMap = new IdentityHashMap<>();
+
+    public static void _main() {
         try {
             ServerSocket recorder = new ServerSocket(1234);
             ServerSocket replayer = new ServerSocket(1235);
             Socket recorderSocket = recorder.accept();
             Socket replayerSocket = replayer.accept();
-            BufferedWriter recOut = new BufferedWriter(new OutputStreamWriter(recorderSocket.getOutputStream()));
-            BufferedWriter repOut = new BufferedWriter(new OutputStreamWriter(replayerSocket.getOutputStream()));
+            OutputStream recOut = recorderSocket.getOutputStream();
+            OutputStream repOut = replayerSocket.getOutputStream();
+            BufferedWriter writeRec = new BufferedWriter(new OutputStreamWriter(recOut));
+            BufferedWriter writeRep = new BufferedWriter(new OutputStreamWriter(repOut));
 
-            recOut.write("READY\n");
-            repOut.write("READY\n");
-            recOut.flush();
-            repOut.flush();
+            writeRec.write("READY\n");
+            writeRep.write("READY\n");
+            writeRec.flush();
+            writeRep.flush();
 
-            DataInputStream recorderInput = new DataInputStream(recorderSocket.getInputStream());
-            DataOutputStream replayerOutput = new DataOutputStream(replayerSocket.getOutputStream());
-            /*File file = new File("/Users/david/IdeaProjects/chroniclerj/Code/temp.test");
-            FileOutputStream fos = new FileOutputStream(file);
-            byte[] buffer = new byte[8192];
-            int count;
-            while ((count = recorderInput.read(buffer)) > 0) {
-                fos.write(buffer, 0, count);
-            }
-            fos.flush();
-            fos.close();*/
+            ObjectInputStream recorderInput = new ObjectInputStream(recorderSocket.getInputStream());
+            ObjectOutputStream replayerOutput = new ObjectOutputStream(repOut);
 
             try {
-                replayerOutput.writeInt(recorderInput.readInt());
-            } catch (IOException e) {
+                while(true) {
+                    replayerOutput.writeObject(recorderInput.readObject());
+                    replayerOutput.flush();
+                    System.out.println(recorderInput.readObject().toString());
+                }
+            } catch (ClassNotFoundException e) {
                 e.printStackTrace();
+            } catch (EOFException e) {
+                recorderSocket.close();
+                replayerSocket.close();
             }
-        recorderSocket.close();
         } catch (IOException e) {
             e.printStackTrace();
         }
-        //classpath[1] = "/Users/david/IdeaProjects/chroniclerj/Code/temp.test";
-        //ReplayRunner._main(classpath);
+
     }
 }

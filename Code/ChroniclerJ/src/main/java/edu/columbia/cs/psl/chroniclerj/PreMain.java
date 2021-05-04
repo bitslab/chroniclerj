@@ -11,6 +11,7 @@ import java.lang.instrument.Instrumentation;
 import java.security.ProtectionDomain;
 import java.util.Scanner;
 
+import edu.columbia.cs.psl.chroniclerj.replay.ReplayUtils;
 import org.objectweb.asm.ClassReader;
 import org.objectweb.asm.ClassVisitor;
 import org.objectweb.asm.ClassWriter;

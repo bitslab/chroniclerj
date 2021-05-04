@@ -1,6 +1,9 @@
 
 package edu.columbia.cs.psl.chroniclerj;
 
+import java.io.*;
+import java.nio.Buffer;
+import java.util.*;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 
@@ -31,12 +34,31 @@ public class Log {
         aLog_fill = 0;
 
     }
-    
+
+    public static Set<String> textSet = new HashSet<>();
+    public static File methodsLog = new File("/Users/david/Desktop/methods.txt");
+
+    public static IdentityHashMap<Object, Integer> idMap = new IdentityHashMap<>();
+    public static Integer count = 0;
+
+    public static void saveToText(String debug, String log) {
+    	String combined = debug + "\t" + log;
+    	if (!textSet.contains(combined)) {
+    		textSet.add(combined);
+			try (Writer writer = new BufferedWriter(new FileWriter(methodsLog, true))) {
+				writer.write(combined);
+				writer.append("\n");
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
+		}
+	}
+
 	public static void log(Object toLog, String debug) {
 		// toLog must be a clone already, let's make it easy...
 		Log.logLock.lock();
 		try {
-			if (Log.aLog_fill >= Log.aLog.length) {
+			/*if (Log.aLog_fill >= Log.aLog.length) {
 				// Grow
 				Object[] newLog = new Object[(int) (Log.aLog.length * Constants.LOG_GROWTH_RATE)];
 				System.arraycopy(Log.aLog, 0, newLog, 0, Log.aLog.length);
@@ -58,7 +80,21 @@ public class Log {
 			Log.aLog_fill++;
 			if (Log.aLog_fill >= Constants.MAX_LOG_SIZE) {
 				ChroniclerJExportRunner._export();
+			}*/
+			if (debug.contains("FileInputStream.<init>")) {
+				idMap.put(toLog, count);
+				try {
+					ChroniclerJExportRunner.data.writeObject(count);
+					ChroniclerJExportRunner.data.writeObject("FIS");
+					ChroniclerJExportRunner.data.writeObject("OBJECT");
+					ChroniclerJExportRunner.data.flush();
+					count++;
+				} catch (IOException e) {
+					e.printStackTrace();
+				}
 			}
+			//if (debug.contains("File"))
+			saveToText(debug, "OBJECT " + toLog.toString());
 		} finally {
 			Log.logLock.unlock();
 		}
@@ -90,6 +126,7 @@ public class Log {
 			if (SerializableLog.zLog_fill >= Constants.MAX_LOG_SIZE) {
 				ChroniclerJExportRunner._export();
 			}
+			saveToText(debug, "BOOLEAN");
 		} finally {
 			Log.logLock.unlock();
 		}
@@ -120,6 +157,7 @@ public class Log {
 			if (SerializableLog.bLog_fill >= Constants.MAX_LOG_SIZE) {
 				ChroniclerJExportRunner._export();
 			}
+			saveToText(debug, "BYTE");
 		} finally {
 			Log.logLock.unlock();
 		}
@@ -150,6 +188,7 @@ public class Log {
 			if (SerializableLog.cLog_fill >= Constants.MAX_LOG_SIZE) {
 				ChroniclerJExportRunner._export();
 			}
+			saveToText(debug, "CHAR");
 		} finally {
 			Log.logLock.unlock();
 		}
@@ -180,6 +219,7 @@ public class Log {
 			if (SerializableLog.fLog_fill >= Constants.MAX_LOG_SIZE) {
 				ChroniclerJExportRunner._export();
 			}
+			saveToText(debug, "FLOAT");
 		} finally {
 			Log.logLock.unlock();
 		}
@@ -210,6 +250,7 @@ public class Log {
 			if (SerializableLog.dLog_fill >= Constants.MAX_LOG_SIZE) {
 				ChroniclerJExportRunner._export();
 			}
+			saveToText(debug, "DOUBLE");
 		} finally {
 			Log.logLock.unlock();
 		}
@@ -217,7 +258,7 @@ public class Log {
 	public static void log(int toLog, String debug) {
 		Log.logLock.lock();
 		try {
-			/*if (SerializableLog.iLog_fill >= SerializableLog.iLog.length) {
+			if (SerializableLog.iLog_fill >= SerializableLog.iLog.length) {
 				// Grow
 				int[] newLog = new int[(int) (SerializableLog.iLog.length * Constants.LOG_GROWTH_RATE)];
 				System.arraycopy(SerializableLog.iLog, 0, newLog, 0, SerializableLog.iLog.length);
@@ -239,8 +280,9 @@ public class Log {
 			SerializableLog.iLog_fill++;
 			if (SerializableLog.iLog_fill >= Constants.MAX_LOG_SIZE) {
 				ChroniclerJExportRunner._export();
-			}*/
+			}
 			ChroniclerJExportRunner.writeToCoordinator(toLog);
+			saveToText(debug, "INT " + toLog);
 		} finally {
 			Log.logLock.unlock();
 		}
@@ -271,6 +313,7 @@ public class Log {
 			if (SerializableLog.sLog_fill >= Constants.MAX_LOG_SIZE) {
 				ChroniclerJExportRunner._export();
 			}
+			saveToText(debug, "SHORT");
 		} finally {
 			Log.logLock.unlock();
 		}
@@ -301,6 +344,7 @@ public class Log {
 			if (SerializableLog.jLog_fill >= Constants.MAX_LOG_SIZE) {
 				ChroniclerJExportRunner._export();
 			}
+			saveToText(debug, "LONG");
 		} finally {
 			Log.logLock.unlock();
 		}
