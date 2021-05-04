@@ -28,6 +28,9 @@ public class InstrumenterClassWriter extends ClassWriter {
         try {
             c = Class.forName(type1.replace('/', '.'), false, loader);
             d = Class.forName(type2.replace('/', '.'), false, loader);
+        } catch (NoClassDefFoundError e) {
+            logger.debug("Error while finding common super class for " + type1 + "; " + type2, e);
+            return "java/lang/Object";
         } catch (ClassNotFoundException e) {
             logger.debug("Error while finding common super class for " + type1 + "; " + type2, e);
             return "java/lang/Object";
