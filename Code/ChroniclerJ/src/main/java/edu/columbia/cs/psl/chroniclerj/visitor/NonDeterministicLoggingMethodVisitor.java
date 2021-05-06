@@ -162,18 +162,26 @@ public class NonDeterministicLoggingMethodVisitor extends CloningAdviceAdapter {
                             captureDesc += t.getDescriptor();
                         captureDesc += ")" + Type.getReturnType(desc).getDescriptor();
                     }
-                    super.visitMethodInsn(invokeOpcode, className, m.getCapturePrefix() + "_capture",
-                            captureDesc, false);
-                    logValueAtTopOfStackToArray(m.getLogClassName(), m.getLogFieldName(), m
-                            .getLogFieldType().getDescriptor(), returnType, true, owner + "."
-                            + name + "\t" + desc + "\t\t" + className + "." + this.name, false,
-                            true);
+
+                    final int javaLambdasAreStupid_opcode = invokeOpcode;
+                    final String javaLambdasAreStupid_captureDesc = captureDesc;
+
+                    invokeMethodAndLogReturn(() -> {
+                        super.visitMethodInsn(javaLambdasAreStupid_opcode, className, m.getCapturePrefix() + "_capture",
+                                javaLambdasAreStupid_captureDesc, false);
+                        logValueAtTopOfStackToArray(m.getLogClassName(), m.getLogFieldName(), m
+                                        .getLogFieldType().getDescriptor(), returnType, true, owner + "."
+                                        + name + "\t" + desc + "\t\t" + className + "." + this.name, false,
+                                true);
+                    });
                 } else {
-                    super.visitMethodInsn(opcode, owner, name, desc, itfc);
-                    logValueAtTopOfStackToArray(m.getLogClassName(), m.getLogFieldName(), m
-                            .getLogFieldType().getDescriptor(), returnType, true, owner + "."
-                            + name + "\t" + desc + "\t\t" + className + "." + this.name, false,
-                            true);
+                    invokeMethodAndLogReturn(() -> {
+                        super.visitMethodInsn(opcode, owner, name, desc, itfc);
+                        logValueAtTopOfStackToArray(m.getLogClassName(), m.getLogFieldName(), m
+                                        .getLogFieldType().getDescriptor(), returnType, true, owner + "."
+                                        + name + "\t" + desc + "\t\t" + className + "." + this.name, false,
+                                true);
+                    });
                 }
             } else if (opcode == INVOKESPECIAL
                     && name.equals("<init>")
@@ -181,40 +189,19 @@ public class NonDeterministicLoggingMethodVisitor extends CloningAdviceAdapter {
                     && !(owner.equals(superName) && this.name
                             .equals("<init>"))) {
 
-                // We need to duplicate the current frame
-                // Let's copy it to a FrameNode
-                FrameNode fn = getCurrentFrameNode(analyzer);
+                invokeMethodAndLogReturn(() -> {
+                    super.visitMethodInsn(opcode, owner, name, desc, itfc);
 
-                Label skip = new Label();
+                    if (analyzer.stack != null && analyzer.stack.size() > 0
+                            && analyzer.stack.get(analyzer.stack.size() - 1).equals(owner)) {
+                        logValueAtTopOfStackToArray(
+                                MethodCall.getLogClassName(Type.getType("L" + owner + ";")), "aLog",
+                                "[Ljava/lang/Object;", Type.getType("L" + owner + ";"), true, owner
+                                        + "." + name + "\t" + desc + "\t\t" + className + "."
+                                        + this.name, false, true);
 
-                super.visitInsn(ICONST_1);
-                super.visitJumpInsn(IFEQ, skip);
-
-                super.visitMethodInsn(opcode, owner, name, desc, itfc);
-
-                if (analyzer.stack != null && analyzer.stack.size() > 0
-                        && analyzer.stack.get(analyzer.stack.size() - 1).equals(owner)) {
-
-                    logValueAtTopOfStackToArray(
-                            MethodCall.getLogClassName(Type.getType("L" + owner + ";")), "aLog",
-                            "[Ljava/lang/Object;", Type.getType("L" + owner + ";"), true, owner
-                                    + "." + name + "\t" + desc + "\t\t" + className + "."
-                                    + this.name, false, true);
-
-                }
-
-                Label end = new Label();
-                super.visitJumpInsn(GOTO, end);
-
-                super.visitLabel(skip);
-                fn.accept(mv); // Duplicate frame here, after a label that we may jump to
-                mv.visitTypeInsn(NEW, "java/lang/Error");
-                mv.visitInsn(DUP);
-                mv.visitMethodInsn(INVOKESPECIAL, "java/lang/Error", "<init>", "()V", false);
-                mv.visitInsn(ATHROW);
-
-                super.visitLabel(end);
-                fn.accept(mv); // Duplicate frame here, after a label that we may jump to
+                    }
+                });
 
                 super.visitInsn(NOP);
 
@@ -242,6 +229,37 @@ public class NonDeterministicLoggingMethodVisitor extends CloningAdviceAdapter {
         } catch (Exception ex) {
             logger.error("Unable to instrument method call", ex);
         }
+    }
+
+    private void invokeMethodAndLogReturn(Runnable instrumenter) {
+        // We need to duplicate the current frame
+        // Let's copy it to a FrameNode
+        FrameNode frameBeforeCallingMethod = getCurrentFrameNode(analyzer);
+
+        Label skip = new Label();
+
+        super.visitInsn(ICONST_1);
+        super.visitJumpInsn(IFEQ, skip);
+
+        // Call the original method and log the return
+        instrumenter.run();
+
+        // We need to duplicate the current frame
+        // Let's copy it to a FrameNode
+        FrameNode frameAfterCallingMethod = getCurrentFrameNode(analyzer);
+
+        Label end = new Label();
+        super.visitJumpInsn(GOTO, end);
+
+        super.visitLabel(skip);
+        frameBeforeCallingMethod.accept(mv); // Duplicate frame here, after a label that we may jump to
+        mv.visitTypeInsn(NEW, "java/lang/Error");
+        mv.visitInsn(DUP);
+        mv.visitMethodInsn(INVOKESPECIAL, "java/lang/Error", "<init>", "()V", false);
+        mv.visitInsn(ATHROW);
+
+        super.visitLabel(end);
+        frameAfterCallingMethod.accept(mv); // Duplicate frame here, after a label that we may jump to
     }
 
     private boolean init = false;
