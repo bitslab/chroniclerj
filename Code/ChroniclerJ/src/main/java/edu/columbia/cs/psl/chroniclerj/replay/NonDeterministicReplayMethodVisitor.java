@@ -54,8 +54,11 @@ public class NonDeterministicReplayMethodVisitor extends InstructionAdapter impl
 //            }
         }
         if (!constructor) {
-            super.visitMethodInsn(Opcodes.INVOKESTATIC, Type.getInternalName(ReplayUtils.class), "connect", "()V", false);
             superInitialized = true;
+        }
+
+        if (name.equals("main") && desc.equals("([Ljava/lang/String;)V")) {
+            super.visitMethodInsn(Opcodes.INVOKESTATIC, Type.getInternalName(ReplayUtils.class), "connect", "()V", false);
         }
     }
 

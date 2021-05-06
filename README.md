@@ -28,12 +28,24 @@ It is important that *all* libraries that you plan to deploy with your applicati
 ### Collecting test cases
 Deploy your code as you normally would, but deploy the code that was instrumented and placed in `outputLocationDeploy` rather than your original, uninstrumented code. Make sure that the **ChroniclerJ** jar is in your classpath too.
 
-When an uncaught exception ocurrs, **ChroniclerJ** generates a test case. You can manually invoke this process (e.g. from your own exception handler) by calling the method `ChroniclerJExceptionRunner.genTestCase()`. Users are notified that a test case was generated, which is placed in the current working directory and has the name format chroniclerj-crash-*currenttime*.test. The test case file contains all logs necessary to replay the execution.
+When an uncaught exception occurs, **ChroniclerJ** generates a test case. You can manually invoke this process (e.g. from your own exception handler) by calling the method `ChroniclerJExceptionRunner.genTestCase()`. Users are notified that a test case was generated, which is placed in the current working directory and has the name format chroniclerj-crash-*currenttime*.test. The test case file contains all logs necessary to replay the execution.
 
 ### Replaying test cases
 To replay the failed executions, run the command `java -jar chroniclerj.jar -replay testCase {classpath}`, where
 * `testCase` is the test case to run
 * `{classpath}` is a space-delimited classpath passed to your program when it starts to replay
+
+
+### General notes on changes made so far
+Instrumentation process remains the same, however running this instrumented code is different.
+There are now 3 programs you must run, which will be referred to as the `Recorder`, the `Replayer`, and the `Coordinator`. 
+
+* `Recorder` - simply run the instrumented code placed in `outputLocationDeploy`, while ensuring that the ChroniclerJ jar is in your classpath.
+* `Replayer` - similar to the `Recorder`, run the code in `outputLocationReplay` with the ChroniclerJ jar in your classpath
+* `Coordinator` - run the command `java -jar ChroniclerJ.jar -coordinator`
+
+All 3 programs will block until each program is up and running. The `Coordinator` must establish communication with the `Recorder` and the `Replayer`.
+
 
 License
 ------

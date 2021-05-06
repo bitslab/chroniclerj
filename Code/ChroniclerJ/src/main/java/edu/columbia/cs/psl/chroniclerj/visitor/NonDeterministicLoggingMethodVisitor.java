@@ -214,7 +214,6 @@ public class NonDeterministicLoggingMethodVisitor extends CloningAdviceAdapter {
 
             if (constructor && !init) {
                 init = true;
-                super.visitMethodInsn(Opcodes.INVOKESTATIC, "java/lang/System", "println", "()V");
 //                AnnotatedMethod am = Instrumenter.getAnnotatedMethod(this.classDesc, "finalize",
 //                        "()V");
 //                if (am != null && am.isCallsNDMethods()) {

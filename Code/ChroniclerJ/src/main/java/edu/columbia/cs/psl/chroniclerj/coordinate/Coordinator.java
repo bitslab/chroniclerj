@@ -46,6 +46,7 @@ public class Coordinator {
             } catch (ClassNotFoundException e) {
                 e.printStackTrace();
             } catch (EOFException e) {
+                System.out.println("EOF Reached - Closing Files");
                 recorderSocket.close();
                 replayerSocket.close();
             }
