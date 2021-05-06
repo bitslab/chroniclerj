@@ -108,9 +108,14 @@ public class PreMain {
 						fos.write(cw.toByteArray());
 						fos.close();
 					}
-					cr = new ClassReader(cw.toByteArray());
-					CheckClassAdapter ca = new CheckClassAdapter(new ClassWriter(0));
-					cr.accept(ca, 0);
+					try {
+						cr = new ClassReader(cw.toByteArray());
+						CheckClassAdapter ca = new CheckClassAdapter(new ClassWriter(0));
+						cr.accept(ca, 0);
+					} catch (ArrayIndexOutOfBoundsException e) {
+						// This may be due to bugs inside CheckClassAdapter
+                        // Ignore, the CheckClassAdapter rejects classes *NOT* by throwing errors
+					}
 					return cw.toByteArray();
 				} catch (Throwable t) {
 					t.printStackTrace();
