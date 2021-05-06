@@ -12,6 +12,7 @@ import org.objectweb.asm.MethodVisitor;
 import org.objectweb.asm.Opcodes;
 import org.objectweb.asm.Type;
 import org.objectweb.asm.commons.AnalyzerAdapter;
+import org.objectweb.asm.tree.FrameNode;
 import org.objectweb.asm.tree.MethodInsnNode;
 
 import edu.columbia.cs.psl.chroniclerj.Instrumenter;
@@ -73,16 +74,8 @@ public class NonDeterministicLoggingMethodVisitor extends CloningAdviceAdapter {
                 .add("java/util/Properties.keys()Ljava/util/Enumeration;org/apache/geronimo/axis/client/GenericServiceEndpoint.createCall");
     }
 
-    private Label skip;
-
     @Override
     public void visitCode() {
-        super.visitCode();
-        if (!this.isAbstract && !"<clinit>".equals(name)) {
-            skip = new Label();
-            super.visitInsn(ICONST_1);
-            super.visitJumpInsn(IFEQ, skip);
-        }
         if (!constructor)
             superInitialized = true;
     }
@@ -118,13 +111,6 @@ public class NonDeterministicLoggingMethodVisitor extends CloningAdviceAdapter {
     @Override
     public void visitEnd() {
         // System.out.println(classDesc + " " + name);
-        if (!this.isAbstract && !"<clinit>".equals(name)) {
-            super.visitLabel(skip);
-            mv.visitTypeInsn(NEW, "java/lang/Error");
-            mv.visitInsn(DUP);
-            mv.visitMethodInsn(INVOKESPECIAL, "java/lang/Error", "<init>", "()V", false);
-            mv.visitInsn(ATHROW);
-        }
         super.visitEnd();
 
         parent.addFieldMarkup(methodCallsToClear);
@@ -195,15 +181,42 @@ public class NonDeterministicLoggingMethodVisitor extends CloningAdviceAdapter {
                     && !(owner.equals(superName) && this.name
                             .equals("<init>"))) {
 
+                // We need to duplicate the current frame
+                // Let's copy it to a FrameNode
+                FrameNode fn = getCurrentFrameNode(analyzer);
+
+                Label skip = new Label();
+
+                super.visitInsn(ICONST_1);
+                super.visitJumpInsn(IFEQ, skip);
+
                 super.visitMethodInsn(opcode, owner, name, desc, itfc);
+
                 if (analyzer.stack != null && analyzer.stack.size() > 0
-                        && analyzer.stack.get(analyzer.stack.size() - 1).equals(owner))
+                        && analyzer.stack.get(analyzer.stack.size() - 1).equals(owner)) {
+
                     logValueAtTopOfStackToArray(
                             MethodCall.getLogClassName(Type.getType("L" + owner + ";")), "aLog",
                             "[Ljava/lang/Object;", Type.getType("L" + owner + ";"), true, owner
                                     + "." + name + "\t" + desc + "\t\t" + className + "."
                                     + this.name, false, true);
-                    super.visitInsn(NOP);
+
+                }
+
+                Label end = new Label();
+                super.visitJumpInsn(GOTO, end);
+
+                super.visitLabel(skip);
+                fn.accept(mv); // Duplicate frame here, after a label that we may jump to
+                mv.visitTypeInsn(NEW, "java/lang/Error");
+                mv.visitInsn(DUP);
+                mv.visitMethodInsn(INVOKESPECIAL, "java/lang/Error", "<init>", "()V", false);
+                mv.visitInsn(ATHROW);
+
+                super.visitLabel(end);
+                fn.accept(mv); // Duplicate frame here, after a label that we may jump to
+
+                super.visitInsn(NOP);
 
             } else
                 super.visitMethodInsn(opcode, owner, name, desc, itfc);
