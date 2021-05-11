@@ -36,7 +36,7 @@ public class NDCombinedClassVisitor extends ClassVisitor implements Opcodes {
     static {
         Scanner s;
         try {
-            s = new Scanner(NonDeterministicLoggingClassVisitor.class
+            s = new Scanner(NDCombinedClassVisitor.class
                     .getResourceAsStream("/listenerMethods.txt"));
             while (s.hasNextLine()) {
                 String l = s.nextLine();

@@ -12,6 +12,7 @@ import java.security.ProtectionDomain;
 import java.util.Scanner;
 
 import edu.columbia.cs.psl.chroniclerj.replay.ReplayUtils;
+import edu.columbia.cs.psl.chroniclerj.visitor.NDCombinedClassVisitor;
 import org.objectweb.asm.ClassReader;
 import org.objectweb.asm.ClassVisitor;
 import org.objectweb.asm.ClassWriter;
@@ -23,10 +24,8 @@ import org.objectweb.asm.tree.ClassNode;
 import org.objectweb.asm.util.CheckClassAdapter;
 import org.objectweb.asm.util.TraceClassVisitor;
 
-import edu.columbia.cs.psl.chroniclerj.replay.NonDeterministicReplayClassVisitor;
 import edu.columbia.cs.psl.chroniclerj.replay.ReplayRunner;
 import edu.columbia.cs.psl.chroniclerj.visitor.CallbackDuplicatingClassVisitor;
-import edu.columbia.cs.psl.chroniclerj.visitor.NonDeterministicLoggingClassVisitor;
 
 public class PreMain {
 	public static boolean replay;
@@ -54,7 +53,7 @@ public class PreMain {
 					if (DEBUG)
 						System.out.println("Inst: " + cr.getClassName());
 					ClassWriter cw = new ClassWriter(cr, ClassWriter.COMPUTE_MAXS | ClassWriter.COMPUTE_FRAMES);
-					NonDeterministicReplayClassVisitor cv = new NonDeterministicReplayClassVisitor(Opcodes.ASM5, cw);
+					NDCombinedClassVisitor cv = new NDCombinedClassVisitor(cw, false);
 					cr.accept(cv, ClassReader.EXPAND_FRAMES);
 					if (DEBUG) {
 						File f = new File("debug-replay/" + className + ".class");
@@ -98,7 +97,7 @@ public class PreMain {
 
 				try {
 					ClassWriter cw = new ClassWriter(ClassWriter.COMPUTE_MAXS);
-					NonDeterministicLoggingClassVisitor cv = new NonDeterministicLoggingClassVisitor(new SerialVersionUIDAdder(cw));
+					NDCombinedClassVisitor cv = new NDCombinedClassVisitor(new SerialVersionUIDAdder(cw), true);
 					CallbackDuplicatingClassVisitor callbackDuplicator = new CallbackDuplicatingClassVisitor(cv);
 
 					cr.accept(callbackDuplicator, ClassReader.EXPAND_FRAMES);
@@ -129,7 +128,7 @@ public class PreMain {
 						fw = new PrintWriter("lastClass.txt");
 
 						tcv = new TraceClassVisitor(fw);
-						NonDeterministicLoggingClassVisitor cv = new NonDeterministicLoggingClassVisitor(new SerialVersionUIDAdder(tcv));
+						NDCombinedClassVisitor cv = new NDCombinedClassVisitor(new SerialVersionUIDAdder(tcv), true);
 						CallbackDuplicatingClassVisitor callbackDuplicator = new CallbackDuplicatingClassVisitor(cv);
 
 						cr.accept(callbackDuplicator, ClassReader.EXPAND_FRAMES);

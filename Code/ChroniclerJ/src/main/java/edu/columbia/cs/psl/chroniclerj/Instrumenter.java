@@ -20,6 +20,7 @@ import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
 import java.util.zip.ZipOutputStream;
 
+import edu.columbia.cs.psl.chroniclerj.visitor.NDCombinedClassVisitor;
 import org.apache.log4j.Logger;
 import org.objectweb.asm.ClassReader;
 import org.objectweb.asm.ClassWriter;
@@ -601,13 +602,13 @@ public class Instrumenter {
     }
     
     public static boolean classIsCallback(String className, String superName, String[] interfaces) {
-		if (NonDeterministicLoggingClassVisitor.callbackClasses.contains(className))
+		if (NDCombinedClassVisitor.callbackClasses.contains(className))
 			return true;
 		if (className.equals("java/lang/Object"))
 			return false;
 		if (interfaces != null)
 			for (String s : interfaces) {
-				if (NonDeterministicLoggingClassVisitor.callbackClasses.contains((s)))
+				if (NDCombinedClassVisitor.callbackClasses.contains((s)))
 					return true;
 			}
 		if (superName != null)
@@ -631,13 +632,13 @@ public class Instrumenter {
 
     public static boolean methodIsCallback(String className, String name, String desc, String superName, String[] interfaces) {
         String key = "." + name + ":" + desc;
-        if (NonDeterministicLoggingClassVisitor.callbackMethods.contains(className + key))
+        if (NDCombinedClassVisitor.callbackMethods.contains(className + key))
 			return true;
 		if (className.equals("java/lang/Object"))
 			return false;
 		if (interfaces != null)
 			for (String s : interfaces) {
-				if (NonDeterministicLoggingClassVisitor.callbackMethods.contains((s + key)))
+				if (NDCombinedClassVisitor.callbackMethods.contains((s + key)))
 					return true;
 			}
 		if (superName != null)
