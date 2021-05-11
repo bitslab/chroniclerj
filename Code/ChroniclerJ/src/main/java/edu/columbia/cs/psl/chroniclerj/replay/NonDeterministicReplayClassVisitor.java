@@ -79,7 +79,7 @@ public class NonDeterministicReplayClassVisitor extends ClassVisitor implements 
 
     private HashSet<MethodCall> loggedMethodCalls = new HashSet<MethodCall>();
 
-    private HashMap<String, MethodInsnNode> captureMethodsToGenerate = new HashMap<String, MethodInsnNode>();
+    private HashMap<MethodCall, MethodInsnNode> captureMethodsToGenerate = new HashMap<MethodCall, MethodInsnNode>();
 
     public void addFieldMarkup(ArrayList<MethodCall> calls) {
         logger.debug("Received field markup from method visitor (" + calls.size() + ")");
@@ -102,7 +102,7 @@ public class NonDeterministicReplayClassVisitor extends ClassVisitor implements 
         return className;
     }
 
-    public void addCaptureMethodsToGenerate(HashMap<String, MethodInsnNode> captureMethodsToGenerate) {
+    public void addCaptureMethodsToGenerate(HashMap<MethodCall, MethodInsnNode> captureMethodsToGenerate) {
         this.captureMethodsToGenerate.putAll(captureMethodsToGenerate);
     }
 }

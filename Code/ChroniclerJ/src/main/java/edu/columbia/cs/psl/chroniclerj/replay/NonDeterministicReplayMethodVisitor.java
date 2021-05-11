@@ -4,13 +4,13 @@ package edu.columbia.cs.psl.chroniclerj.replay;
 import java.util.ArrayList;
 import java.util.HashMap;
 
+import edu.columbia.cs.psl.chroniclerj.visitor.NDCombinedClassVisitor;
+import edu.columbia.cs.psl.chroniclerj.visitor.NonDeterministicLoggingClassVisitor;
 import org.apache.log4j.Logger;
-import org.objectweb.asm.Label;
-import org.objectweb.asm.MethodVisitor;
-import org.objectweb.asm.Opcodes;
-import org.objectweb.asm.Type;
+import org.objectweb.asm.*;
 import org.objectweb.asm.commons.AnalyzerAdapter;
 import org.objectweb.asm.commons.InstructionAdapter;
+import org.objectweb.asm.commons.Method;
 import org.objectweb.asm.tree.MethodInsnNode;
 
 import edu.columbia.cs.psl.chroniclerj.CallbackRegistry;
@@ -66,7 +66,7 @@ public class NonDeterministicReplayMethodVisitor extends InstructionAdapter impl
 
     AnalyzerAdapter analyzer;
 
-    protected NonDeterministicReplayMethodVisitor(int api, MethodVisitor mv, int access,
+    public NonDeterministicReplayMethodVisitor(int api, MethodVisitor mv, int access,
             String name, String desc, String classDesc, boolean isFirstConstructor,
             AnalyzerAdapter analyzer, boolean isCallbackInit) {
         super(api, mv);
@@ -80,9 +80,13 @@ public class NonDeterministicReplayMethodVisitor extends InstructionAdapter impl
         this.isCallbackInit = isCallbackInit;
     }
 
-    private NonDeterministicReplayClassVisitor parent;
+    private ClassVisitor parent;
 
     public void setClassVisitor(NonDeterministicReplayClassVisitor coaClassVisitor) {
+        this.parent = coaClassVisitor;
+    }
+
+    public void setClassVisitor(NDCombinedClassVisitor coaClassVisitor) {
         this.parent = coaClassVisitor;
     }
 
@@ -93,8 +97,13 @@ public class NonDeterministicReplayMethodVisitor extends InstructionAdapter impl
     @Override
     public void visitEnd() {
         super.visitEnd();
-        parent.addFieldMarkup(methodCallsToClear);
-        parent.addCaptureMethodsToGenerate(captureMethodsToGenerate);
+        if (parent instanceof NDCombinedClassVisitor) {
+            ((NDCombinedClassVisitor) parent).addFieldMarkup(methodCallsToClear);
+            ((NDCombinedClassVisitor) parent).addCaptureMethodsToGenerate(captureMethodsToGenerate);
+        } else {
+            ((NonDeterministicReplayClassVisitor) parent).addFieldMarkup(methodCallsToClear);
+            ((NonDeterministicReplayClassVisitor) parent).addCaptureMethodsToGenerate(captureMethodsToGenerate);
+        }
     }
 
     private int lineNumber = 0;
@@ -106,7 +115,7 @@ public class NonDeterministicReplayMethodVisitor extends InstructionAdapter impl
     }
 
 
-    private HashMap<String, MethodInsnNode> captureMethodsToGenerate = new HashMap<String, MethodInsnNode>();
+    private HashMap<MethodCall, MethodInsnNode> captureMethodsToGenerate = new HashMap<MethodCall, MethodInsnNode>();
 
     private boolean inited;
 

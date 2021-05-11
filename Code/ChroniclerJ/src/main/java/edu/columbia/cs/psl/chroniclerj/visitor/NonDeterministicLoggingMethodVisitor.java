@@ -6,11 +6,7 @@ import java.util.HashSet;
 import java.util.Scanner;
 
 import org.apache.log4j.Logger;
-import org.objectweb.asm.Handle;
-import org.objectweb.asm.Label;
-import org.objectweb.asm.MethodVisitor;
-import org.objectweb.asm.Opcodes;
-import org.objectweb.asm.Type;
+import org.objectweb.asm.*;
 import org.objectweb.asm.commons.AnalyzerAdapter;
 import org.objectweb.asm.tree.MethodInsnNode;
 
@@ -103,9 +99,13 @@ public class NonDeterministicLoggingMethodVisitor extends CloningAdviceAdapter {
         this.isFirstConstructor = isFirstConstructor;
     }
 
-    private NonDeterministicLoggingClassVisitor parent;
+    private ClassVisitor parent;
 
     public void setClassVisitor(NonDeterministicLoggingClassVisitor coaClassVisitor) {
+        this.parent = coaClassVisitor;
+    }
+
+    public void setClassVisitor(NDCombinedClassVisitor coaClassVisitor) {
         this.parent = coaClassVisitor;
     }
 
@@ -127,8 +127,13 @@ public class NonDeterministicLoggingMethodVisitor extends CloningAdviceAdapter {
         }
         super.visitEnd();
 
-        parent.addFieldMarkup(methodCallsToClear);
-        parent.addCaptureMethodsToGenerate(captureMethodsToGenerate);
+        if (parent instanceof NDCombinedClassVisitor) {
+            ((NDCombinedClassVisitor) parent).addFieldMarkup(methodCallsToClear);
+            ((NDCombinedClassVisitor) parent).addCaptureMethodsToGenerate(captureMethodsToGenerate);
+        } else {
+            ((NonDeterministicLoggingClassVisitor) parent).addFieldMarkup(methodCallsToClear);
+            ((NonDeterministicLoggingClassVisitor) parent).addCaptureMethodsToGenerate(captureMethodsToGenerate);
+        }
     }
 
     private int lineNumber = 0;

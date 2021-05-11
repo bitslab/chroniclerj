@@ -57,8 +57,7 @@ public class NonDeterministicLoggingClassVisitor extends ClassVisitor implements
     private static Logger logger = Logger.getLogger(NonDeterministicLoggingClassVisitor.class);
 
     @Override
-    public void visit(int version, int access, String name, String signature, String superName,
-            String[] interfaces) {
+    public void visit(int version, int access, String name, String signature, String superName, String[] interfaces) {
         super.visit(version, access, name, signature, superName, interfaces);
         this.className = name;
         this.superName = superName;

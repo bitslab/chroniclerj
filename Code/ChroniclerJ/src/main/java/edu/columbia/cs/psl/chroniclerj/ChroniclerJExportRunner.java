@@ -28,7 +28,7 @@ public class ChroniclerJExportRunner extends Thread {
     public static void writeToCoordinator(int integer) {
         try {
             data.writeObject(integer);
-            data.writeObject("INT");
+            //data.writeObject("INT");
             data.flush();
         } catch (IOException e) {
             e.printStackTrace();

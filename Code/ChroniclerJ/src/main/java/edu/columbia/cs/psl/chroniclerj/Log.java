@@ -58,7 +58,7 @@ public class Log {
 		// toLog must be a clone already, let's make it easy...
 		Log.logLock.lock();
 		try {
-			/*if (Log.aLog_fill >= Log.aLog.length) {
+			if (Log.aLog_fill >= Log.aLog.length) {
 				// Grow
 				Object[] newLog = new Object[(int) (Log.aLog.length * Constants.LOG_GROWTH_RATE)];
 				System.arraycopy(Log.aLog, 0, newLog, 0, Log.aLog.length);
@@ -80,8 +80,8 @@ public class Log {
 			Log.aLog_fill++;
 			if (Log.aLog_fill >= Constants.MAX_LOG_SIZE) {
 				ChroniclerJExportRunner._export();
-			}*/
-			if (debug.contains("FileInputStream.<init>")) {
+			}
+			/*if (debug.contains("FileInputStream.<init>")) {
 				idMap.put(toLog, count);
 				try {
 					ChroniclerJExportRunner.data.writeObject(count);
@@ -92,7 +92,7 @@ public class Log {
 				} catch (IOException e) {
 					e.printStackTrace();
 				}
-			}
+			}*/
 			//if (debug.contains("File"))
 			saveToText(debug, "OBJECT " + toLog.toString());
 		} finally {
