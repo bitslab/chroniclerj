@@ -15,6 +15,7 @@ import java.util.jar.JarEntry;
 import java.util.jar.JarFile;
 import java.util.jar.JarOutputStream;
 
+import edu.columbia.cs.psl.chroniclerj.visitor.NDCombinedClassVisitor;
 import org.apache.log4j.Logger;
 import org.objectweb.asm.ClassReader;
 import org.objectweb.asm.ClassWriter;
@@ -61,8 +62,7 @@ public class Replayer {
             }
             ClassWriter cw = new InstrumenterClassWriter(cr, ClassWriter.COMPUTE_MAXS
                     | ClassWriter.COMPUTE_FRAMES, Instrumenter.loader);
-            NonDeterministicReplayClassVisitor cv = new NonDeterministicReplayClassVisitor(
-                    Opcodes.ASM5, cw);
+            NDCombinedClassVisitor cv = new NDCombinedClassVisitor(cw, false);
             cr.accept(cv, ClassReader.EXPAND_FRAMES);
             lastInstrumentedClass = cv.getClassName();
             byte[] out = cw.toByteArray();
