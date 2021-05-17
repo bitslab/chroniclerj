@@ -10,6 +10,10 @@ import edu.columbia.cs.psl.chroniclerj.ExportedSerializableLog;
 import edu.columbia.cs.psl.chroniclerj.Log;
 
 public class ReplayUtils {
+
+	static ObjectInputStream in;
+	static boolean connected = false;
+
 	@SuppressWarnings({ "rawtypes", "unchecked" })
 	public static int getNextIndex(HashMap replayIndexMap, String[] threadEntries, int fill) {
 		String threadName = Thread.currentThread().getName();
@@ -107,27 +111,30 @@ public class ReplayUtils {
 
 	private static Socket socket;
 	public static void connect() {
-		while (true) {
-			try {
-				socket = new Socket("localhost", 1235);
-				BufferedReader in = new BufferedReader(new InputStreamReader(socket.getInputStream()));
-				String input = in.readLine();
-				while (!input.equals("READY")) {
+		if (!connected) {
+			while (true) {
+				try {
+					socket = new Socket("localhost", 1235);
+					in = new ObjectInputStream(socket.getInputStream());
+					Boolean ready = in.readBoolean();
+					while (!ready) {
+						try {
+							Thread.sleep(100);
+							ready = in.readBoolean();
+						} catch (InterruptedException ie) {
+							ie.printStackTrace();
+						}
+					}
+					break;
+				} catch (IOException e) {
 					try {
 						Thread.sleep(100);
-						input = in.readLine();
 					} catch (InterruptedException ie) {
 						ie.printStackTrace();
 					}
 				}
-				break;
-			} catch (IOException e) {
-				try {
-					Thread.sleep(100);
-				} catch (InterruptedException ie) {
-					ie.printStackTrace();
-				}
 			}
+			connected = true;
 		}
 	}
 
@@ -142,9 +149,8 @@ public class ReplayUtils {
 			}
 			ExportedLog.globalReplayIndex++;
 			return ExportedSerializableLog.iLog[idx];*/
-			ObjectInputStream socketInput = new ObjectInputStream(socket.getInputStream());
-			data = (int) socketInput.readObject();
-		} catch (IOException | ClassNotFoundException e) {
+			data = in.readInt();
+		} catch (IOException e) {
 			e.printStackTrace();
 		} finally {
 			Log.logLock.unlock();

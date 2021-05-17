@@ -16,39 +16,35 @@ public class Coordinator {
     static volatile boolean replayerStatus = false;
      */
 
-    static IdentityHashMap<Integer, Object> idMap = new IdentityHashMap<>();
-
     public static void _main() {
         try {
             ServerSocket recorder = new ServerSocket(1234);
             ServerSocket replayer = new ServerSocket(1235);
             Socket recorderSocket = recorder.accept();
             Socket replayerSocket = replayer.accept();
-            OutputStream recOut = recorderSocket.getOutputStream();
-            OutputStream repOut = replayerSocket.getOutputStream();
-            BufferedWriter writeRec = new BufferedWriter(new OutputStreamWriter(recOut));
-            BufferedWriter writeRep = new BufferedWriter(new OutputStreamWriter(repOut));
+            ObjectOutputStream recOut = new ObjectOutputStream(recorderSocket.getOutputStream());
+            ObjectOutputStream repOut = new ObjectOutputStream(replayerSocket.getOutputStream());
+            ObjectInputStream recIn = new ObjectInputStream(recorderSocket.getInputStream());
 
-            writeRec.write("READY\n");
-            writeRep.write("READY\n");
-            writeRec.flush();
-            writeRep.flush();
-
-            ObjectInputStream recorderInput = new ObjectInputStream(recorderSocket.getInputStream());
-            ObjectOutputStream replayerOutput = new ObjectOutputStream(repOut);
+            recOut.writeBoolean(true);
+            repOut.writeBoolean(true);
+            recOut.flush();
+            repOut.flush();
 
             try {
                 while(true) {
-                    replayerOutput.writeObject(recorderInput.readObject());
-                    replayerOutput.flush();
-                    System.out.println(recorderInput.readObject().toString());
+                    Object input = recIn.readObject();
+                    if (input.getClass() == Integer.class){
+                        repOut.writeInt((int) input);
+                        repOut.flush();
+                        System.out.println(input.toString());
+                    }
                 }
             } catch (ClassNotFoundException e) {
                 e.printStackTrace();
             } catch (EOFException e) {
-                System.out.println("EOF Reached - Closing Files");
-                recorderSocket.close();
-                replayerSocket.close();
+                while (true) {}
+                //System.out.println("EOF Reached");
             }
         } catch (IOException e) {
             e.printStackTrace();

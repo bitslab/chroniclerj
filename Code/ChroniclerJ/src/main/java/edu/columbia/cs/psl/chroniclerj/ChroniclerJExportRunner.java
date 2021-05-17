@@ -16,6 +16,8 @@ import edu.columbia.cs.psl.chroniclerj.xstream.StaticReflectionProvider;
 public class ChroniclerJExportRunner extends Thread {
     public static Socket socket;
     public static ObjectOutputStream data;
+    public static ObjectInputStream in;
+    public static boolean connected = false;
 
     private static String mainClass = "";
 
@@ -25,40 +27,34 @@ public class ChroniclerJExportRunner extends Thread {
 
     private static ArrayList<String> otherLogs = new ArrayList<>();
 
-    public static void writeToCoordinator(int integer) {
-        try {
-            data.writeObject(integer);
-            //data.writeObject("INT");
-            data.flush();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-    }
     public static void connect() {
         //Method to establish a connection to Coordinator
         //Spins until connection is successful and Coordinator returns READY signal
-        while (true) {
-            try {
-                socket = new Socket("localhost", 1234);
-                data = new ObjectOutputStream(socket.getOutputStream());
-                BufferedReader in = new BufferedReader(new InputStreamReader(socket.getInputStream()));
-                String input = in.readLine();
-                while (!input.equals("READY")) {
+        if (!connected) {
+            while (true) {
+                try {
+                    socket = new Socket("localhost", 1234);
+                    data = new ObjectOutputStream(socket.getOutputStream());
+                    in = new ObjectInputStream(socket.getInputStream());
+                    Boolean ready = in.readBoolean();
+                    while (!ready) {
+                        try {
+                            Thread.sleep(100);
+                            ready = in.readBoolean();
+                        } catch (InterruptedException ie) {
+                            ie.printStackTrace();
+                        }
+                    }
+                    break;
+                } catch (IOException e) {
                     try {
                         Thread.sleep(100);
-                        input = in.readLine();
                     } catch (InterruptedException ie) {
                         ie.printStackTrace();
                     }
                 }
-                break;
-            } catch (IOException e) {
-                try {
-                    Thread.sleep(100);
-                } catch (InterruptedException ie) {
-                    ie.printStackTrace();
-                }
             }
+            connected = true;
         }
     }
 

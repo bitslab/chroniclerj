@@ -13,6 +13,7 @@ import java.util.Scanner;
 
 import edu.columbia.cs.psl.chroniclerj.replay.ReplayUtils;
 import edu.columbia.cs.psl.chroniclerj.visitor.NDCombinedClassVisitor;
+import edu.columbia.cs.psl.chroniclerj.visitor.WrapInputOutputStreamClassVisitor;
 import org.objectweb.asm.ClassReader;
 import org.objectweb.asm.ClassVisitor;
 import org.objectweb.asm.ClassWriter;
@@ -98,6 +99,7 @@ public class PreMain {
 				try {
 					ClassWriter cw = new ClassWriter(ClassWriter.COMPUTE_MAXS);
 					NDCombinedClassVisitor cv = new NDCombinedClassVisitor(new SerialVersionUIDAdder(cw), true);
+					//WrapInputOutputStreamClassVisitor wioscv = new WrapInputOutputStreamClassVisitor(cv);
 					CallbackDuplicatingClassVisitor callbackDuplicator = new CallbackDuplicatingClassVisitor(cv);
 
 					cr.accept(callbackDuplicator, ClassReader.EXPAND_FRAMES);

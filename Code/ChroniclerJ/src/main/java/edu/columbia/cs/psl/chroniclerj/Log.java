@@ -281,8 +281,10 @@ public class Log {
 			if (SerializableLog.iLog_fill >= Constants.MAX_LOG_SIZE) {
 				ChroniclerJExportRunner._export();
 			}
-			ChroniclerJExportRunner.writeToCoordinator(toLog);
+			ChroniclerJExportRunner.data.writeObject(toLog);
 			saveToText(debug, "INT " + toLog);
+		} catch (IOException e) {
+			e.printStackTrace();
 		} finally {
 			Log.logLock.unlock();
 		}
