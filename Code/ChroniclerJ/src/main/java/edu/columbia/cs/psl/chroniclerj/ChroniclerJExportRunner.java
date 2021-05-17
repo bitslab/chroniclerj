@@ -67,10 +67,12 @@ public class ChroniclerJExportRunner extends Thread {
         FUTURE CONSIDERATION -> make the change to the Instrumenter
         Instrumenter -> adds a method to instrumented code which will connect to coordinator
         */
-        CloningUtils.init();
-        mainClass = main;
-        mainArgs = new String[args.length];
-        System.arraycopy(args, 0, mainArgs, 0, args.length);
+        if ("".equals(mainClass)) {
+            CloningUtils.init();
+            mainClass = main;
+            mainArgs = new String[args.length];
+            System.arraycopy(args, 0, mainArgs, 0, args.length);
+        }
     }
 
     public static String nameOverride;
