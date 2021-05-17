@@ -78,6 +78,8 @@ public class NonDeterministicLoggingMethodVisitor extends CloningAdviceAdapter {
     public void visitCode() {
         if (!constructor)
             superInitialized = true;
+
+        super.visitCode();
     }
 
     private boolean isFirstConstructor;
@@ -189,19 +191,19 @@ public class NonDeterministicLoggingMethodVisitor extends CloningAdviceAdapter {
                     && !(owner.equals(superName) && this.name
                             .equals("<init>"))) {
 
-                invokeMethodAndLogReturn(() -> {
+//                invokeMethodAndLogReturn(() -> {
                     super.visitMethodInsn(opcode, owner, name, desc, itfc);
 
-                    if (analyzer.stack != null && analyzer.stack.size() > 0
-                            && analyzer.stack.get(analyzer.stack.size() - 1).equals(owner)) {
-                        logValueAtTopOfStackToArray(
-                                MethodCall.getLogClassName(Type.getType("L" + owner + ";")), "aLog",
-                                "[Ljava/lang/Object;", Type.getType("L" + owner + ";"), true, owner
-                                        + "." + name + "\t" + desc + "\t\t" + className + "."
-                                        + this.name, false, true);
-
-                    }
-                });
+//                    if (analyzer.stack != null && analyzer.stack.size() > 0
+//                            && analyzer.stack.get(analyzer.stack.size() - 1).equals(owner)) {
+//                        logValueAtTopOfStackToArray(
+//                                MethodCall.getLogClassName(Type.getType("L" + owner + ";")), "aLog",
+//                                "[Ljava/lang/Object;", Type.getType("L" + owner + ";"), true, owner
+//                                        + "." + name + "\t" + desc + "\t\t" + className + "."
+//                                        + this.name, false, true);
+//
+//                    }
+//                });
 
                 super.visitInsn(NOP);
 
