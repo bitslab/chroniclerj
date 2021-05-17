@@ -29,10 +29,13 @@ public class ChroniclerJExportRunner extends Thread {
     private static ArrayList<String> otherLogs = new ArrayList<>();
 
     public static void logMain(String main, String[] args) {
-        CloningUtils.init();
-        mainClass = main;
-        mainArgs = new String[args.length];
-        System.arraycopy(args, 0, mainArgs, 0, args.length);
+        if ("".equals(mainClass)) {
+            CloningUtils.init();
+            mainClass = main;
+            mainArgs = new String[args.length];
+            System.arraycopy(args, 0, mainArgs, 0, args.length);
+            ChroniclerJExportRunner.registerShutdownHook();
+        }
     }
 
     public static String nameOverride;
