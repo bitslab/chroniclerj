@@ -10,10 +10,6 @@ import edu.columbia.cs.psl.chroniclerj.ExportedSerializableLog;
 import edu.columbia.cs.psl.chroniclerj.Log;
 
 public class ReplayUtils {
-
-	static ObjectInputStream in;
-	static boolean connected = false;
-
 	@SuppressWarnings({ "rawtypes", "unchecked" })
 	public static int getNextIndex(HashMap replayIndexMap, String[] threadEntries, int fill) {
 		String threadName = Thread.currentThread().getName();
@@ -94,22 +90,10 @@ public class ReplayUtils {
 		return -1;
 	}
 
-	public static Object getNextObject() {
-		Log.logLock.lock();
-		try {
-			int idx = ReplayUtils.getNextIndexO(ExportedLog.aLog_replayIndex, ExportedLog.aLog_owners, ExportedLog.aLog_fill, ExportedLog.aLog);
-			while (idx < 0) {
-				idx = ReplayUtils.getNextIndexO(ExportedLog.aLog_replayIndex, ExportedLog.aLog_owners, ExportedLog.aLog_fill, ExportedLog.aLog);
-				ReplayRunner.loadNextLog("edu/columbia/cs/psl/chroniclerj/ExportedLog");
-			}
-			ExportedLog.globalReplayIndex++;
-			return ExportedLog.aLog[idx];
-		} finally {
-			Log.logLock.unlock();
-		}
-	}
-
+	static ObjectInputStream in;
+	static boolean connected = false;
 	private static Socket socket;
+
 	public static void connect() {
 		if (!connected) {
 			while (true) {
@@ -138,129 +122,106 @@ public class ReplayUtils {
 		}
 	}
 
-	public static int getNextI() {
+	public static Object getNextObject() {
 		Log.logLock.lock();
-		int data = 0;
 		try {
-			/*int idx = ReplayUtils.getNextIndex(ExportedSerializableLog.iLog_replayIndex, ExportedSerializableLog.iLog_owners, ExportedSerializableLog.iLog_fill);
+			int idx = ReplayUtils.getNextIndexO(ExportedLog.aLog_replayIndex, ExportedLog.aLog_owners, ExportedLog.aLog_fill, ExportedLog.aLog);
 			while (idx < 0) {
-				ReplayRunner.loadNextLog("edu/columbia/cs/psl/chroniclerj/ExportedSerializableLog");
-				idx = ReplayUtils.getNextIndex(ExportedSerializableLog.iLog_replayIndex, ExportedSerializableLog.iLog_owners, ExportedSerializableLog.iLog_fill);
+				idx = ReplayUtils.getNextIndexO(ExportedLog.aLog_replayIndex, ExportedLog.aLog_owners, ExportedLog.aLog_fill, ExportedLog.aLog);
+				ReplayRunner.loadNextLog("edu/columbia/cs/psl/chroniclerj/ExportedLog");
 			}
 			ExportedLog.globalReplayIndex++;
-			return ExportedSerializableLog.iLog[idx];*/
+			return ExportedLog.aLog[idx];
+		} finally {
+			Log.logLock.unlock();
+		}
+		/*Object data = null;
+		try {
+			data = in.readObject();
+		} catch (IOException | ClassNotFoundException e) {
+			e.printStackTrace();
+		}
+		return data;*/
+	}
+
+	public static int getNextI() {
+		int data = 0;
+		try {
 			data = in.readInt();
 		} catch (IOException e) {
 			e.printStackTrace();
-		} finally {
-			Log.logLock.unlock();
 		}
 		return data;
 	}
 
 	public static float getNextF() {
-		Log.logLock.lock();
+		float data = 0;
 		try {
-			int idx = ReplayUtils.getNextIndex(ExportedSerializableLog.fLog_replayIndex, ExportedSerializableLog.fLog_owners, ExportedSerializableLog.fLog_fill);
-			while (idx < 0) {
-				ReplayRunner.loadNextLog("edu/columbia/cs/psl/chroniclerj/ExportedSerializableLog");
-				idx = ReplayUtils.getNextIndex(ExportedSerializableLog.fLog_replayIndex, ExportedSerializableLog.fLog_owners, ExportedSerializableLog.fLog_fill);
-			}
-			ExportedLog.globalReplayIndex++;
-			return ExportedSerializableLog.fLog[idx];
-		} finally {
-			Log.logLock.unlock();
+			data = in.readFloat();
+		} catch (IOException e) {
+			e.printStackTrace();
 		}
+		return data;
 	}
 
 	public static short getNextS() {
-		Log.logLock.lock();
+		short data = 0;
 		try {
-			int idx = ReplayUtils.getNextIndex(ExportedSerializableLog.sLog_replayIndex, ExportedSerializableLog.sLog_owners, ExportedSerializableLog.sLog_fill);
-			while (idx < 0) {
-				ReplayRunner.loadNextLog("edu/columbia/cs/psl/chroniclerj/ExportedSerializableLog");
-				idx = ReplayUtils.getNextIndex(ExportedSerializableLog.sLog_replayIndex, ExportedSerializableLog.sLog_owners, ExportedSerializableLog.sLog_fill);
-			}
-			ExportedLog.globalReplayIndex++;
-			return ExportedSerializableLog.sLog[idx];
-		} finally {
-			Log.logLock.unlock();
+			data = in.readShort();
+		} catch (IOException e) {
+			e.printStackTrace();
 		}
+		return data;
 	}
 
 	public static long getNextJ() {
-		Log.logLock.lock();
+		long data = 0;
 		try {
-			int idx = ReplayUtils.getNextIndex(ExportedSerializableLog.jLog_replayIndex, ExportedSerializableLog.jLog_owners, ExportedSerializableLog.jLog_fill);
-			while (idx < 0) {
-				ReplayRunner.loadNextLog("edu/columbia/cs/psl/chroniclerj/ExportedSerializableLog");
-				idx = ReplayUtils.getNextIndex(ExportedSerializableLog.jLog_replayIndex, ExportedSerializableLog.jLog_owners, ExportedSerializableLog.jLog_fill);
-			}
-			ExportedLog.globalReplayIndex++;
-			return ExportedSerializableLog.jLog[idx];
-		} finally {
-			Log.logLock.unlock();
+			data = in.readLong();
+		} catch (IOException e) {
+			e.printStackTrace();
 		}
+		return data;
 	}
 
 	public static boolean getNextZ() {
-		Log.logLock.lock();
+		boolean data = false;
 		try {
-			int idx = ReplayUtils.getNextIndex(ExportedSerializableLog.zLog_replayIndex, ExportedSerializableLog.zLog_owners, ExportedSerializableLog.zLog_fill);
-			while (idx < 0) {
-				ReplayRunner.loadNextLog("edu/columbia/cs/psl/chroniclerj/ExportedSerializableLog");
-				idx = ReplayUtils.getNextIndex(ExportedSerializableLog.zLog_replayIndex, ExportedSerializableLog.zLog_owners, ExportedSerializableLog.zLog_fill);
-			}
-			ExportedLog.globalReplayIndex++;
-			return ExportedSerializableLog.zLog[idx];
-		} finally {
-			Log.logLock.unlock();
+			data = in.readBoolean();
+		} catch (IOException e) {
+			e.printStackTrace();
 		}
+		return data;
 	}
 
 	public static byte getNextB() {
-		Log.logLock.lock();
+		byte data = 0;
 		try {
-			int idx = ReplayUtils.getNextIndex(ExportedSerializableLog.bLog_replayIndex, ExportedSerializableLog.bLog_owners, ExportedSerializableLog.bLog_fill);
-			while (idx < 0) {
-				ReplayRunner.loadNextLog("edu/columbia/cs/psl/chroniclerj/ExportedSerializableLog");
-				idx = ReplayUtils.getNextIndex(ExportedSerializableLog.bLog_replayIndex, ExportedSerializableLog.bLog_owners, ExportedSerializableLog.bLog_fill);
-			}
-			ExportedLog.globalReplayIndex++;
-			return ExportedSerializableLog.bLog[idx];
-		} finally {
-			Log.logLock.unlock();
+			data = in.readByte();
+		} catch (IOException e) {
+			e.printStackTrace();
 		}
+		return data;
 	}
 
 	public static char getNextC() {
-		Log.logLock.lock();
+		char data = 0;
 		try {
-			int idx = ReplayUtils.getNextIndex(ExportedSerializableLog.cLog_replayIndex, ExportedSerializableLog.cLog_owners, ExportedSerializableLog.cLog_fill);
-			while (idx < 0) {
-				ReplayRunner.loadNextLog("edu/columbia/cs/psl/chroniclerj/ExportedSerializableLog");
-				idx = ReplayUtils.getNextIndex(ExportedSerializableLog.cLog_replayIndex, ExportedSerializableLog.cLog_owners, ExportedSerializableLog.cLog_fill);
-			}
-			ExportedLog.globalReplayIndex++;
-			return ExportedSerializableLog.cLog[idx];
-		} finally {
-			Log.logLock.unlock();
+			data = in.readChar();
+		} catch (IOException e) {
+			e.printStackTrace();
 		}
+		return data;
 	}
 
 	public static double getNextD() {
-		Log.logLock.lock();
+		double data = 0;
 		try {
-			int idx = ReplayUtils.getNextIndex(ExportedSerializableLog.dLog_replayIndex, ExportedSerializableLog.dLog_owners, ExportedSerializableLog.dLog_fill);
-			while (idx < 0) {
-				ReplayRunner.loadNextLog("edu/columbia/cs/psl/chroniclerj/ExportedSerializableLog");
-				idx = ReplayUtils.getNextIndex(ExportedSerializableLog.dLog_replayIndex, ExportedSerializableLog.dLog_owners, ExportedSerializableLog.dLog_fill);
-			}
-			ExportedLog.globalReplayIndex++;
-			return ExportedSerializableLog.dLog[idx];
-		} finally {
-			Log.logLock.unlock();
+			data = in.readDouble();
+		} catch (IOException e) {
+			e.printStackTrace();
 		}
+		return data;
 	}
 
 	public static void copyInto(Object dest, Object src, int len) {

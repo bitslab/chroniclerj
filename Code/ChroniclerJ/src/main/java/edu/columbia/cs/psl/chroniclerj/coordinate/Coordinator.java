@@ -34,10 +34,43 @@ public class Coordinator {
             try {
                 while(true) {
                     Object input = recIn.readObject();
-                    if (input.getClass() == Integer.class){
-                        repOut.writeInt((int) input);
-                        repOut.flush();
-                        System.out.println(input.toString());
+                    switch (input.getClass().getSimpleName()) {
+                        case "Integer":
+                            repOut.writeInt((int) input);
+                            repOut.flush();
+                            break;
+                        case "Float":
+                            repOut.writeFloat((float) input);
+                            repOut.flush();
+                            break;
+                        case "Short":
+                            repOut.writeShort((short) input);
+                            repOut.flush();
+                            break;
+                        case "Long":
+                            repOut.writeLong((long) input);
+                            repOut.flush();
+                            break;
+                        case "Boolean":
+                            repOut.writeBoolean((boolean) input);
+                            repOut.flush();
+                            break;
+                        case "Byte":
+                            repOut.writeByte((byte) input);
+                            repOut.flush();
+                            break;
+                        case "Char":
+                            repOut.writeChar((char) input);
+                            repOut.flush();
+                            break;
+                        case "Double":
+                            repOut.writeDouble((double) input);
+                            repOut.flush();
+                            break;
+                        default:
+                            repOut.writeObject(input);
+                            repOut.flush();
+                            break;
                     }
                 }
             } catch (ClassNotFoundException e) {

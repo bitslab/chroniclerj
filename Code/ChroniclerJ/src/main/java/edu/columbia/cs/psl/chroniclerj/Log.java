@@ -81,19 +81,7 @@ public class Log {
 			if (Log.aLog_fill >= Constants.MAX_LOG_SIZE) {
 				ChroniclerJExportRunner._export();
 			}
-			/*if (debug.contains("FileInputStream.<init>")) {
-				idMap.put(toLog, count);
-				try {
-					ChroniclerJExportRunner.data.writeObject(count);
-					ChroniclerJExportRunner.data.writeObject("FIS");
-					ChroniclerJExportRunner.data.writeObject("OBJECT");
-					ChroniclerJExportRunner.data.flush();
-					count++;
-				} catch (IOException e) {
-					e.printStackTrace();
-				}
-			}*/
-			//if (debug.contains("File"))
+			//ChroniclerJExportRunner.data.writeObject(toLog);
 			saveToText(debug, "OBJECT " + toLog.toString());
 		} finally {
 			Log.logLock.unlock();
@@ -126,7 +114,10 @@ public class Log {
 			if (SerializableLog.zLog_fill >= Constants.MAX_LOG_SIZE) {
 				ChroniclerJExportRunner._export();
 			}
+			ChroniclerJExportRunner.data.writeObject(toLog);
 			saveToText(debug, "BOOLEAN");
+		} catch (IOException e) {
+			e.printStackTrace();
 		} finally {
 			Log.logLock.unlock();
 		}
@@ -157,7 +148,10 @@ public class Log {
 			if (SerializableLog.bLog_fill >= Constants.MAX_LOG_SIZE) {
 				ChroniclerJExportRunner._export();
 			}
+			ChroniclerJExportRunner.data.writeObject(toLog);
 			saveToText(debug, "BYTE");
+		} catch (IOException e) {
+			e.printStackTrace();
 		} finally {
 			Log.logLock.unlock();
 		}
@@ -188,7 +182,10 @@ public class Log {
 			if (SerializableLog.cLog_fill >= Constants.MAX_LOG_SIZE) {
 				ChroniclerJExportRunner._export();
 			}
+			ChroniclerJExportRunner.data.writeObject(toLog);
 			saveToText(debug, "CHAR");
+		} catch (IOException e) {
+			e.printStackTrace();
 		} finally {
 			Log.logLock.unlock();
 		}
@@ -219,7 +216,10 @@ public class Log {
 			if (SerializableLog.fLog_fill >= Constants.MAX_LOG_SIZE) {
 				ChroniclerJExportRunner._export();
 			}
+			ChroniclerJExportRunner.data.writeObject(toLog);
 			saveToText(debug, "FLOAT");
+		} catch (IOException e) {
+			e.printStackTrace();
 		} finally {
 			Log.logLock.unlock();
 		}
@@ -250,7 +250,10 @@ public class Log {
 			if (SerializableLog.dLog_fill >= Constants.MAX_LOG_SIZE) {
 				ChroniclerJExportRunner._export();
 			}
+			ChroniclerJExportRunner.data.writeObject(toLog);
 			saveToText(debug, "DOUBLE");
+		} catch (IOException e) {
+			e.printStackTrace();
 		} finally {
 			Log.logLock.unlock();
 		}
@@ -315,7 +318,10 @@ public class Log {
 			if (SerializableLog.sLog_fill >= Constants.MAX_LOG_SIZE) {
 				ChroniclerJExportRunner._export();
 			}
+			ChroniclerJExportRunner.data.writeObject(toLog);
 			saveToText(debug, "SHORT");
+		} catch (IOException e) {
+			e.printStackTrace();
 		} finally {
 			Log.logLock.unlock();
 		}
@@ -346,7 +352,10 @@ public class Log {
 			if (SerializableLog.jLog_fill >= Constants.MAX_LOG_SIZE) {
 				ChroniclerJExportRunner._export();
 			}
+			ChroniclerJExportRunner.data.writeObject(toLog);
 			saveToText(debug, "LONG");
+		} catch (IOException e) {
+			e.printStackTrace();
 		} finally {
 			Log.logLock.unlock();
 		}
