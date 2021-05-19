@@ -41,18 +41,19 @@ public class Log {
     public static IdentityHashMap<Object, Integer> idMap = new IdentityHashMap<>();
     public static Integer count = 0;
 
+  /*  static int i = 0;
     public static void saveToText(String debug, String log) {
     	String combined = debug + "\t" + log;
-    	if (!textSet.contains(combined)) {
-    		textSet.add(combined);
-			try (Writer writer = new BufferedWriter(new FileWriter(methodsLog, true))) {
+		try (Writer writer = new BufferedWriter(new FileWriter(methodsLog, true))) {
+			if (!textSet.contains(combined)) {
+				textSet.add(combined);
 				writer.write(combined);
 				writer.append("\n");
-			} catch (IOException e) {
-				e.printStackTrace();
 			}
+		} catch (IOException e) {
+			e.printStackTrace();
 		}
-	}
+	}*/
 
 	public static void log(Object toLog, String debug) {
 		// toLog must be a clone already, let's make it easy...
@@ -81,8 +82,10 @@ public class Log {
 			if (Log.aLog_fill >= Constants.MAX_LOG_SIZE) {
 				ChroniclerJExportRunner._export();
 			}
-			//ChroniclerJExportRunner.data.writeObject(toLog);
-			saveToText(debug, "OBJECT " + toLog.toString());
+			ChroniclerJExportRunner.data.writeObject(toLog);
+			//saveToText(debug, "OBJECT " + toLog.toString());
+		} catch (IOException e) {
+			e.printStackTrace();
 		} finally {
 			Log.logLock.unlock();
 		}
@@ -115,7 +118,7 @@ public class Log {
 				ChroniclerJExportRunner._export();
 			}
 			ChroniclerJExportRunner.data.writeObject(toLog);
-			saveToText(debug, "BOOLEAN");
+			//saveToText(debug, "BOOLEAN");
 		} catch (IOException e) {
 			e.printStackTrace();
 		} finally {
@@ -149,7 +152,7 @@ public class Log {
 				ChroniclerJExportRunner._export();
 			}
 			ChroniclerJExportRunner.data.writeObject(toLog);
-			saveToText(debug, "BYTE");
+			//saveToText(debug, "BYTE");
 		} catch (IOException e) {
 			e.printStackTrace();
 		} finally {
@@ -183,7 +186,7 @@ public class Log {
 				ChroniclerJExportRunner._export();
 			}
 			ChroniclerJExportRunner.data.writeObject(toLog);
-			saveToText(debug, "CHAR");
+			//saveToText(debug, "CHAR");
 		} catch (IOException e) {
 			e.printStackTrace();
 		} finally {
@@ -217,7 +220,7 @@ public class Log {
 				ChroniclerJExportRunner._export();
 			}
 			ChroniclerJExportRunner.data.writeObject(toLog);
-			saveToText(debug, "FLOAT");
+			//saveToText(debug, "FLOAT");
 		} catch (IOException e) {
 			e.printStackTrace();
 		} finally {
@@ -251,7 +254,7 @@ public class Log {
 				ChroniclerJExportRunner._export();
 			}
 			ChroniclerJExportRunner.data.writeObject(toLog);
-			saveToText(debug, "DOUBLE");
+			//saveToText(debug, "DOUBLE");
 		} catch (IOException e) {
 			e.printStackTrace();
 		} finally {
@@ -285,7 +288,7 @@ public class Log {
 				ChroniclerJExportRunner._export();
 			}
 			ChroniclerJExportRunner.data.writeObject(toLog);
-			saveToText(debug, "INT " + toLog);
+			//saveToText(debug, "INT " + toLog);
 		} catch (IOException e) {
 			e.printStackTrace();
 		} finally {
@@ -319,7 +322,7 @@ public class Log {
 				ChroniclerJExportRunner._export();
 			}
 			ChroniclerJExportRunner.data.writeObject(toLog);
-			saveToText(debug, "SHORT");
+			//saveToText(debug, "SHORT");
 		} catch (IOException e) {
 			e.printStackTrace();
 		} finally {
@@ -353,7 +356,7 @@ public class Log {
 				ChroniclerJExportRunner._export();
 			}
 			ChroniclerJExportRunner.data.writeObject(toLog);
-			saveToText(debug, "LONG");
+			//saveToText(debug, "LONG");
 		} catch (IOException e) {
 			e.printStackTrace();
 		} finally {

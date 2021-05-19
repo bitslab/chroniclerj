@@ -1,10 +1,8 @@
 package edu.columbia.cs.psl.chroniclerj.coordinate;
 
-import edu.columbia.cs.psl.chroniclerj.replay.ReplayRunner;
 import java.io.*;
 import java.net.ServerSocket;
 import java.net.Socket;
-import java.util.IdentityHashMap;
 
 public class Coordinator {
 
@@ -76,8 +74,8 @@ public class Coordinator {
             } catch (ClassNotFoundException e) {
                 e.printStackTrace();
             } catch (EOFException e) {
-                while (true) {}
-                //System.out.println("EOF Reached");
+                //while (true) {}
+                System.out.println("EOF Reached");
             }
         } catch (IOException e) {
             e.printStackTrace();

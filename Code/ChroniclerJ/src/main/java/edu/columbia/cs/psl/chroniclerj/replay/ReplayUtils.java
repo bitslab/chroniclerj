@@ -121,9 +121,19 @@ public class ReplayUtils {
 			connected = true;
 		}
 	}
-
+	/*public static File methodsLog = new File("/Users/david/Desktop/co.txt");
+	public static void saveToText() {
+			try (Writer writer = new BufferedWriter(new FileWriter(methodsLog, true))) {
+				Integer a = ++i;
+				writer.write(a.toString());
+				writer.append("\n");
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
+	}
+	static int i = 0;*/
 	public static Object getNextObject() {
-		Log.logLock.lock();
+		/*Log.logLock.lock();
 		try {
 			int idx = ReplayUtils.getNextIndexO(ExportedLog.aLog_replayIndex, ExportedLog.aLog_owners, ExportedLog.aLog_fill, ExportedLog.aLog);
 			while (idx < 0) {
@@ -134,20 +144,22 @@ public class ReplayUtils {
 			return ExportedLog.aLog[idx];
 		} finally {
 			Log.logLock.unlock();
-		}
-		/*Object data = null;
+		}*/
+		Object data = null;
 		try {
 			data = in.readObject();
+			//saveToText();
 		} catch (IOException | ClassNotFoundException e) {
 			e.printStackTrace();
 		}
-		return data;*/
+		return data;
 	}
 
 	public static int getNextI() {
 		int data = 0;
 		try {
 			data = in.readInt();
+			//saveToText();
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
@@ -158,6 +170,7 @@ public class ReplayUtils {
 		float data = 0;
 		try {
 			data = in.readFloat();
+			//saveToText();
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
@@ -168,6 +181,7 @@ public class ReplayUtils {
 		short data = 0;
 		try {
 			data = in.readShort();
+			//saveToText();
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
@@ -178,6 +192,7 @@ public class ReplayUtils {
 		long data = 0;
 		try {
 			data = in.readLong();
+			//saveToText();
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
@@ -188,6 +203,7 @@ public class ReplayUtils {
 		boolean data = false;
 		try {
 			data = in.readBoolean();
+			//saveToText();
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
@@ -198,6 +214,7 @@ public class ReplayUtils {
 		byte data = 0;
 		try {
 			data = in.readByte();
+			//saveToText();
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
@@ -208,6 +225,7 @@ public class ReplayUtils {
 		char data = 0;
 		try {
 			data = in.readChar();
+			//saveToText();
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
@@ -218,6 +236,7 @@ public class ReplayUtils {
 		double data = 0;
 		try {
 			data = in.readDouble();
+			//saveToText();
 		} catch (IOException e) {
 			e.printStackTrace();
 		}

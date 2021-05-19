@@ -36,11 +36,6 @@ else
 
     echo "Instrumenting file $DACAPO_INSTALL/jar/$FILE"
 
-    # Instrument Dacapo's Harness
-    $JAVA_HOME/bin/java $DEBUG -cp $CHRONICLER_JAR edu.columbia.cs.psl.chroniclerj.Main -instrument $DACAPO_INSTALL/Harness.class rec rep
-    cp rec/Harness.class $DACAPO_REC_INSTALL/Harness.class
-    cp rep/Harness.class $DACAPO_REP_INSTALL/Harness.class
-
     # Instrument the jar with the target code
     $JAVA_HOME/bin/java $DEBUG -cp $CHRONICLER_JAR:$DACAPO_INSTALL/jar/xml-apis-ext.jar edu.columbia.cs.psl.chroniclerj.Main -instrument $DACAPO_INSTALL/jar/$FILE rec rep
     cp rec/$FILE $DACAPO_REC_INSTALL/jar/$FILE
