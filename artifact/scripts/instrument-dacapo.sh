@@ -18,8 +18,50 @@ cp -r $DACAPO_INSTALL $DACAPO_REP_INSTALL
 
 FILE=""
 case $1 in
-    "avrora")
+    "avrora")   #Working
         FILE=avrora-cvs-20091224.jar
+        ;;
+    "batik")
+        FILE=batik-all.jar
+        ;;
+    "eclipse")
+        FILE=eclipse.jar
+        ;;
+    "fop")
+        FILE=fop.jar
+        ;;
+    "h2")
+        FILE=dacapo-h2.jar
+        ;;
+    "jython")
+        FILE=jython.jar
+        ;;
+    "luindex")
+        FILE=dacapo-luindex.jar
+        ;;
+    "lusearch-fix")
+        FILE=dacapo-lusearch-fix.jar
+        ;;
+    "lusearch")
+        FILE=dacapo-lusearch.jar
+        ;;
+    "pmd")
+        FILE=pmd-4.2.5.jar
+        ;;
+    "sunflow")
+        FILE=sunflow-0.07.2.jar
+        ;;
+    "tomcat")
+        FILE=dacapo-tomcat.jar
+        ;;
+    "tradebeans")
+        FILE=daytrader.jar
+        ;;
+    "tradesoap")
+        FILE=daytrader.jar
+        ;;
+    "xalan")
+        FILE=dacapo-xalan.jar
         ;;
 esac
 
@@ -35,6 +77,10 @@ if [ -z "$FILE" ]; then
 else
 
     echo "Instrumenting file $DACAPO_INSTALL/jar/$FILE"
+
+    $JAVA_HOME/bin/java $DEBUG -cp $CHRONICLER_JAR edu.columbia.cs.psl.chroniclerj.Main -instrument $DACAPO_INSTALL/Harness.class rec rep
+    cp rec/Harness.class $DACAPO_REC_INSTALL/Harness.class
+    cp rep/Harness.class $DACAPO_REP_INSTALL/Harness.class
 
     # Instrument the jar with the target code
     $JAVA_HOME/bin/java $DEBUG -cp $CHRONICLER_JAR:$DACAPO_INSTALL/jar/xml-apis-ext.jar edu.columbia.cs.psl.chroniclerj.Main -instrument $DACAPO_INSTALL/jar/$FILE rec rep
