@@ -1,5 +1,7 @@
 package edu.columbia.cs.psl.chroniclerj.coordinate;
 
+import com.thoughtworks.xstream.XStream;
+
 import java.io.*;
 import java.net.ServerSocket;
 import java.net.Socket;
@@ -13,62 +15,80 @@ public class Coordinator {
     static volatile boolean recorderStatus = false;
     static volatile boolean replayerStatus = false;
      */
+    static XStream xstream = new XStream();
+    static boolean flag = false;
 
     public static void _main() {
         try {
-            ServerSocket recorder = new ServerSocket(1234);
-            ServerSocket replayer = new ServerSocket(1235);
+            ServerSocket recorder = new ServerSocket(3322);
             Socket recorderSocket = recorder.accept();
-            Socket replayerSocket = replayer.accept();
             ObjectOutputStream recOut = new ObjectOutputStream(recorderSocket.getOutputStream());
-            ObjectOutputStream repOut = new ObjectOutputStream(replayerSocket.getOutputStream());
             ObjectInputStream recIn = new ObjectInputStream(recorderSocket.getInputStream());
 
+            ServerSocket replayer = null;
+            Socket replayerSocket = null;
+            ObjectOutputStream repOut = null;
+
+            if (flag) {
+                replayer = new ServerSocket(4231);
+                replayerSocket = replayer.accept();
+                repOut = new ObjectOutputStream(replayerSocket.getOutputStream());
+                repOut.writeBoolean(true);
+                repOut.flush();
+            }
+
             recOut.writeBoolean(true);
-            repOut.writeBoolean(true);
             recOut.flush();
-            repOut.flush();
 
             try {
                 while(true) {
                     Object input = recIn.readObject();
-                    switch (input.getClass().getSimpleName()) {
-                        case "Integer":
-                            repOut.writeInt((int) input);
-                            repOut.flush();
-                            break;
-                        case "Float":
-                            repOut.writeFloat((float) input);
-                            repOut.flush();
-                            break;
-                        case "Short":
-                            repOut.writeShort((short) input);
-                            repOut.flush();
-                            break;
-                        case "Long":
-                            repOut.writeLong((long) input);
-                            repOut.flush();
-                            break;
-                        case "Boolean":
-                            repOut.writeBoolean((boolean) input);
-                            repOut.flush();
-                            break;
-                        case "Byte":
-                            repOut.writeByte((byte) input);
-                            repOut.flush();
-                            break;
-                        case "Char":
-                            repOut.writeChar((char) input);
-                            repOut.flush();
-                            break;
-                        case "Double":
-                            repOut.writeDouble((double) input);
-                            repOut.flush();
-                            break;
-                        default:
-                            repOut.writeObject(input);
-                            repOut.flush();
-                            break;
+                    if (input != null && input.getClass().getSimpleName().equals("XMLAlert")) {
+                        Object obj = xstream.fromXML((String) recIn.readObject());
+                        if (obj == null) {
+                            System.out.println("NULL");
+                        } else {
+                            System.out.println(obj.getClass().getSimpleName());
+                        }
+                    }
+                    if (flag) {
+                        if (input == null) {
+                            repOut.writeObject(null);
+                        } else {
+                            switch (input.getClass().getSimpleName()) {
+                                case "XMLAlert":
+                                    System.out.println(recIn.readObject());
+                                    break;
+                                case "Integer":
+                                    repOut.writeInt((int) input);
+                                    break;
+                                case "Float":
+                                    repOut.writeFloat((float) input);
+                                    break;
+                                case "Short":
+                                    repOut.writeShort((short) input);
+                                    break;
+                                case "Long":
+                                    repOut.writeLong((long) input);
+                                    break;
+                                case "Boolean":
+                                    repOut.writeBoolean((boolean) input);
+                                    break;
+                                case "Byte":
+                                    repOut.writeByte((byte) input);
+                                    break;
+                                case "Char":
+                                    repOut.writeChar((char) input);
+                                    break;
+                                case "Double":
+                                    repOut.writeDouble((double) input);
+                                    break;
+                                default:
+                                    repOut.writeObject(input);
+                                    break;
+                            }
+                        }
+                        repOut.flush();
                     }
                 }
             } catch (ClassNotFoundException e) {

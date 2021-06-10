@@ -19,49 +19,49 @@ cp -r $DACAPO_INSTALL $DACAPO_REP_INSTALL
 FILE=""
 case $1 in
     "avrora")   #Working
-        FILE=avrora-cvs-20091224.jar
+        FILE=(avrora-cvs-20091224.jar)
         ;;
-    "batik")
-        FILE=batik-all.jar
+    "batik") #xml-apis.jar throws IllegalAccessError also fails when trying to write not serializable object
+        FILE=(batik-all.jar xml-apis-ext.jar crimson-1.1.3.jar xerces_2_5_0.jar xalan-2.6.0.jar)
         ;;
-    "eclipse")
-        FILE=eclipse.jar
+    "eclipse") #java.io.BufferedInputStream not serializable
+        FILE=(eclipse.jar)
         ;;
-    "fop")
-        FILE=fop.jar
+    "fop") #xml-apis-1.3.04.jar throws IllegalAccessError / JarURLInputStream is not serializable
+        FILE=(fop.jar avalon-framework-4.2.0.jar batik-all-1.7.jar commons-io-1.3.1.jar commons-logging-1.0.4.jar serializer-2.7.0.jar servlet-2.2.jar xalan-2.7.0.jar xercesImpl-2.7.1.jar xml-apis-ext-1.3.04.jar xmlgraphics-commons-1.3.1.jar)
         ;;
-    "h2")
-        FILE=dacapo-h2.jar
+    "h2") #org.h2.Driver not serializable
+        FILE=(dacapo-h2.jar derbyTesting.jar junit-3.8.1.jar h2-1.2.121.jar)
         ;;
-    "jython")
-        FILE=jython.jar
+    "jython") #java.util.zip.ZipEntry not serializable
+        FILE=(jython.jar antlr-3.1.3.jar asm-3.1.jar asm-commons-3.1.jar constantine.jar guava-r07.jar jaffl.jar jline-0.9.95-SNAPSHOT.jar jnr-posix.jar)
         ;;
-    "luindex")
-        FILE=dacapo-luindex.jar
+    "luindex") #java.io.FileDescriptor not serializable
+        FILE=(dacapo-luindex.jar lucene-core-2.4.jar lucene-demos-2.4.jar)
         ;;
-    "lusearch-fix")
-        FILE=dacapo-lusearch-fix.jar
+    "lusearch-fix") #Verification Error
+        FILE=(dacapo-lusearch-fix.jar lucene-core-2.4.jar lucene-demos-2.4.jar)
         ;;
-    "lusearch")
-        FILE=dacapo-lusearch.jar
+    "lusearch") #Verification Error
+        FILE=(dacapo-lusearch.jar lucene-core-2.4.jar lucene-demos-2.4.jar)
         ;;
-    "pmd")
-        FILE=pmd-4.2.5.jar
+    "pmd") #xml-apis.jar throws IllegalAccessError and StreamCorruptedException
+        FILE=(pmd-4.2.5.jar jaxen-1.1.1.jar asm-3.1.jar junit-3.8.1.jar xercesImpl.jar)
         ;;
-    "sunflow")
-        FILE=sunflow-0.07.2.jar
+    "sunflow") #Working
+        FILE=(sunflow-0.07.2.jar janino-2.5.15.jar)
         ;;
-    "tomcat")
-        FILE=dacapo-tomcat.jar
+    "tomcat") #java.io.BufferedInputStream not serializable
+        FILE=(dacapo-tomcat.jar dacapo-digest.jar bootstrap.jar tomcat-juli.jar commons-daemon.jar commons-httpclient.jar commons-logging.jar commons-codec.jar)
         ;;
-    "tradebeans")
-        FILE=daytrader.jar
+    "tradebeans") #Possibly working? Getting strange errors from log4j. Not sure if they are important
+        FILE=(daytrader.jar)
         ;;
-    "tradesoap")
-        FILE=daytrader.jar
+    "tradesoap") #Same as tradebeans
+        FILE=(daytrader.jar)
         ;;
-    "xalan")
-        FILE=dacapo-xalan.jar
+    "xalan") #xml-apis.jar throws IllegalAccessError / org.apache.xerces.jaxp.SAXParserImpl$JAXPSAXParser not serializable
+        FILE=(dacapo-xalan.jar xalan.jar xercesImpl.jar serializer.jar)
         ;;
 esac
 
@@ -76,16 +76,20 @@ if [ -z "$FILE" ]; then
 
 else
 
-    echo "Instrumenting file $DACAPO_INSTALL/jar/$FILE"
+    echo "Instrumenting file $DACAPO_INSTALL/Harness"
 
     $JAVA_HOME/bin/java $DEBUG -cp $CHRONICLER_JAR edu.columbia.cs.psl.chroniclerj.Main -instrument $DACAPO_INSTALL/Harness.class rec rep
     cp rec/Harness.class $DACAPO_REC_INSTALL/Harness.class
     cp rep/Harness.class $DACAPO_REP_INSTALL/Harness.class
 
     # Instrument the jar with the target code
-    $JAVA_HOME/bin/java $DEBUG -cp $CHRONICLER_JAR:$DACAPO_INSTALL/jar/xml-apis-ext.jar edu.columbia.cs.psl.chroniclerj.Main -instrument $DACAPO_INSTALL/jar/$FILE rec rep
-    cp rec/$FILE $DACAPO_REC_INSTALL/jar/$FILE
-    cp rep/$FILE $DACAPO_REP_INSTALL/jar/$FILE
+    for jfile in "${FILE[@]}";
+    do
+    echo "Instrumenting file $DACAPO_INSTALL/jar/$jfile"
+    $JAVA_HOME/bin/java $DEBUG -cp $CHRONICLER_JAR:$DACAPO_INSTALL/jar/xml-apis-ext.jar edu.columbia.cs.psl.chroniclerj.Main -instrument $DACAPO_INSTALL/jar/$jfile rec rep
+    cp rec/$jfile $DACAPO_REC_INSTALL/jar/$jfile
+    cp rep/$jfile $DACAPO_REP_INSTALL/jar/$jfile
+    done
     rm -rf rec rep
 
 fi

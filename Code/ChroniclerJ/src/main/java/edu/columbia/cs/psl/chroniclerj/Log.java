@@ -7,6 +7,7 @@ import java.util.*;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 
+import com.thoughtworks.xstream.XStream;
 import edu.columbia.cs.psl.chroniclerj.replay.ReplayUtils;
 
 public class Log {
@@ -35,6 +36,7 @@ public class Log {
 
     }
 
+    static XStream xstream = new XStream();
     public static Set<String> textSet = new HashSet<>();
     public static File methodsLog = new File("/Users/david/Desktop/methods.txt");
 
@@ -54,6 +56,11 @@ public class Log {
 			e.printStackTrace();
 		}
 	}*/
+
+	static class XMLAlert implements Serializable {
+		public XMLAlert() {
+		}
+	}
 
 	public static void log(Object toLog, String debug) {
 		// toLog must be a clone already, let's make it easy...
@@ -82,7 +89,10 @@ public class Log {
 			if (Log.aLog_fill >= Constants.MAX_LOG_SIZE) {
 				ChroniclerJExportRunner._export();
 			}
-			ChroniclerJExportRunner.data.writeObject(toLog);
+			String objectXML = xstream.toXML(toLog);
+			ChroniclerJExportRunner.data.writeObject(new XMLAlert());
+			ChroniclerJExportRunner.data.writeObject(objectXML);
+			ChroniclerJExportRunner.data.flush();
 			//saveToText(debug, "OBJECT " + toLog.toString());
 		} catch (IOException e) {
 			e.printStackTrace();
