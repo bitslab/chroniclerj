@@ -8,7 +8,9 @@ import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 
 import com.thoughtworks.xstream.XStream;
+import com.thoughtworks.xstream.XStreamException;
 import edu.columbia.cs.psl.chroniclerj.replay.ReplayUtils;
+import edu.columbia.cs.psl.chroniclerj.xstream.StaticReflectionProvider;
 
 public class Log {
     public static Object[] aLog = new Object[Constants.DEFAULT_LOG_SIZE];
@@ -57,7 +59,7 @@ public class Log {
 		}
 	}*/
 
-	static class XMLAlert implements Serializable {
+	public static class XMLAlert implements Serializable {
 		public XMLAlert() {
 		}
 	}
@@ -89,12 +91,17 @@ public class Log {
 			if (Log.aLog_fill >= Constants.MAX_LOG_SIZE) {
 				ChroniclerJExportRunner._export();
 			}
-			String objectXML = xstream.toXML(toLog);
-			ChroniclerJExportRunner.data.writeObject(new XMLAlert());
-			ChroniclerJExportRunner.data.writeObject(objectXML);
-			ChroniclerJExportRunner.data.flush();
+			if (toLog instanceof Serializable) {
+				ChroniclerJExportRunner.data.writeObject(toLog);
+				ChroniclerJExportRunner.data.flush();
+			} else {
+				//String objectXML = xstream.toXML(toLog);
+				//ChroniclerJExportRunner.data.writeObject(new XMLAlert());
+				//ChroniclerJExportRunner.data.writeObject(objectXML);
+				//ChroniclerJExportRunner.data.flush();
+			}
 			//saveToText(debug, "OBJECT " + toLog.toString());
-		} catch (IOException e) {
+		} catch (IOException | XStreamException e) {
 			e.printStackTrace();
 		} finally {
 			Log.logLock.unlock();

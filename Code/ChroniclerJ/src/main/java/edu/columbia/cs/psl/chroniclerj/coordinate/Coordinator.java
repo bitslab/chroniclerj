@@ -1,6 +1,9 @@
 package edu.columbia.cs.psl.chroniclerj.coordinate;
 
 import com.thoughtworks.xstream.XStream;
+import com.thoughtworks.xstream.converters.ConversionException;
+import edu.columbia.cs.psl.chroniclerj.Log;
+import edu.columbia.cs.psl.chroniclerj.xstream.StaticReflectionProvider;
 
 import java.io.*;
 import java.net.ServerSocket;
@@ -17,10 +20,11 @@ public class Coordinator {
      */
     static XStream xstream = new XStream();
     static boolean flag = false;
+    static boolean serialFlag = false;
 
     public static void _main() {
         try {
-            ServerSocket recorder = new ServerSocket(3322);
+            ServerSocket recorder = new ServerSocket(1234);
             Socket recorderSocket = recorder.accept();
             ObjectOutputStream recOut = new ObjectOutputStream(recorderSocket.getOutputStream());
             ObjectInputStream recIn = new ObjectInputStream(recorderSocket.getInputStream());
@@ -43,12 +47,17 @@ public class Coordinator {
             try {
                 while(true) {
                     Object input = recIn.readObject();
-                    if (input != null && input.getClass().getSimpleName().equals("XMLAlert")) {
-                        Object obj = xstream.fromXML((String) recIn.readObject());
-                        if (obj == null) {
-                            System.out.println("NULL");
-                        } else {
-                            System.out.println(obj.getClass().getSimpleName());
+                    if (input instanceof Log.XMLAlert) {
+                        System.out.println("ALERT");
+                    }
+                    if (serialFlag) {
+                        if (input != null && input.getClass().getSimpleName().equals("XMLAlert")) {
+                            Object obj = xstream.fromXML((String) recIn.readObject());
+                            if (obj == null) {
+                                //System.out.println("NULL");
+                            } else {
+                                System.out.println(obj.getClass().getSimpleName());
+                            }
                         }
                     }
                     if (flag) {
