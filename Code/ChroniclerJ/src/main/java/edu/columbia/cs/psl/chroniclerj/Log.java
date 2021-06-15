@@ -92,6 +92,25 @@ public class Log {
 				ChroniclerJExportRunner._export();
 			}
 			if (toLog instanceof Serializable) {
+//				if (toLog.getClass().getName().endsWith("ICC_ColorSpace")) {
+//				    ByteArrayOutputStream baos = new ByteArrayOutputStream();
+//				    ObjectOutputStream oos = new ObjectOutputStream(baos);
+//
+//				    oos.writeObject(toLog);
+//					baos.close();
+//
+//					byte[] bytes = baos.toByteArray();
+//
+//					ByteArrayInputStream bais = new ByteArrayInputStream(bytes);
+//					ObjectInputStream ois = new ObjectInputStream(bais);
+//					try {
+//						System.out.println(ois.readObject());
+//					} catch (ClassNotFoundException e) {
+//						System.out.println("Error");
+//					}
+//				}
+				System.out.println(toLog.getClass().getName());
+				System.out.println(debug);
 				ChroniclerJExportRunner.data.writeObject(toLog);
 				ChroniclerJExportRunner.data.flush();
 			} else {
