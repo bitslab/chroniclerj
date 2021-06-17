@@ -109,8 +109,9 @@ public class Log {
 //						System.out.println("Error");
 //					}
 //				}
-				System.out.println(toLog.getClass().getName());
+				//System.out.println(toLog.getClass().getName());
 				System.out.println(debug);
+				//ChroniclerJExportRunner.data.writeObject(debug);
 				ChroniclerJExportRunner.data.writeObject(toLog);
 				ChroniclerJExportRunner.data.flush();
 			} else {

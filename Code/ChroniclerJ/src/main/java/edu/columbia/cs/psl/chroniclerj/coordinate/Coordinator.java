@@ -24,33 +24,47 @@ public class Coordinator {
 
     public static void _main() {
         try {
-            ServerSocket recorder = new ServerSocket(1234);
-            Socket recorderSocket = recorder.accept();
-            ObjectOutputStream recOut = new ObjectOutputStream(recorderSocket.getOutputStream());
-            ObjectInputStream recIn = new ObjectInputStream(recorderSocket.getInputStream());
+            ServerSocket recorder = null;
+            Socket recorderSocket = null;
+            ObjectOutputStream recOut = null;
+            ObjectInputStream recIn = null;
 
             ServerSocket replayer = null;
             Socket replayerSocket = null;
             ObjectOutputStream repOut = null;
 
+            try {
+                recorder = new ServerSocket(1234);
+                recorderSocket = recorder.accept();
+                recOut = new ObjectOutputStream(recorderSocket.getOutputStream());
+                recIn = new ObjectInputStream(recorderSocket.getInputStream());
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+
+
             if (flag) {
-                replayer = new ServerSocket(4231);
-                replayerSocket = replayer.accept();
-                repOut = new ObjectOutputStream(replayerSocket.getOutputStream());
-                repOut.writeBoolean(true);
-                repOut.flush();
+                try {
+                    replayer = new ServerSocket(4231);
+                    replayerSocket = replayer.accept();
+                    repOut = new ObjectOutputStream(replayerSocket.getOutputStream());
+                    repOut.writeBoolean(true);
+                    repOut.flush();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
             }
 
             recOut.writeBoolean(true);
             recOut.flush();
 
             try {
-                while(true) {
+                while (true) {
                     Object input = recIn.readObject();
-                    if (input instanceof Log.XMLAlert) {
-                        System.out.println("ALERT");
+                    if (input instanceof String) {
+                       System.out.println(input);
                     }
-                    if (serialFlag) {
+                    /*if (serialFlag) {
                         if (input != null && input.getClass().getSimpleName().equals("XMLAlert")) {
                             Object obj = xstream.fromXML((String) recIn.readObject());
                             if (obj == null) {
@@ -59,8 +73,8 @@ public class Coordinator {
                                 System.out.println(obj.getClass().getSimpleName());
                             }
                         }
-                    }
-                    if (flag) {
+                    }*/
+                    /*if (flag) {
                         if (input == null) {
                             repOut.writeObject(null);
                         } else {
@@ -96,9 +110,9 @@ public class Coordinator {
                                     repOut.writeObject(input);
                                     break;
                             }
-                        }
-                        repOut.flush();
-                    }
+                        }*/
+                    //repOut.flush();
+                    //}
                 }
             } catch (ClassNotFoundException e) {
                 e.printStackTrace();
