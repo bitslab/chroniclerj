@@ -18,7 +18,7 @@ public class Coordinator {
     static volatile boolean recorderStatus = false;
     static volatile boolean replayerStatus = false;
      */
-    static XStream xstream = new XStream();
+    static XStream xstream = new XStream(new StaticReflectionProvider());
     static boolean flag = false;
     static boolean serialFlag = false;
 
@@ -61,9 +61,9 @@ public class Coordinator {
             try {
                 while (true) {
                     Object input = recIn.readObject();
-                    if (input instanceof String) {
-                       System.out.println(input);
-                    }
+                    //if (input instanceof String) {
+                    //   System.out.println(input);
+                    //}
                     /*if (serialFlag) {
                         if (input != null && input.getClass().getSimpleName().equals("XMLAlert")) {
                             Object obj = xstream.fromXML((String) recIn.readObject());
