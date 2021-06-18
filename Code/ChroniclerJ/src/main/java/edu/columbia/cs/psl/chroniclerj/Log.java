@@ -38,7 +38,14 @@ public class Log {
 
     }
 
-    static XStream xstream = new XStream(new StaticReflectionProvider());
+    static final XStream xstream;
+
+    static {
+		xstream = new XStream(new StaticReflectionProvider());
+		// -10 is the same priority as the SerializationConverter, this converter will run first
+		xstream.registerConverter(new SerializationBugConverter(xstream), -10);
+	}
+
     public static Set<String> textSet = new HashSet<>();
     public static File methodsLog = new File("/Users/david/Desktop/methods.txt");
 
