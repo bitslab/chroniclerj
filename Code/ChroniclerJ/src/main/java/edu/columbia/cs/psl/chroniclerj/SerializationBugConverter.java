@@ -17,6 +17,7 @@ import java.util.Set;
 public class SerializationBugConverter extends ReflectionConverter {
     private static final String[] KNOWN_BUGGY_CLASSES = new String[] {
             "java.awt.color.ICC_ProfileRGB",
+            "java.util.Collections$SynchronizedSet",
     };
 
     private static final Set<String> KNOWN_BUGGY_CLASSES_SET = new HashSet<>(Arrays.asList(KNOWN_BUGGY_CLASSES));

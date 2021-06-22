@@ -21,31 +21,31 @@ case $1 in
     "avrora")   #Working
         FILE=(avrora-cvs-20091224.jar)
         ;;
-    "batik") #xml-apis.jar throws IllegalAccessError / Works for passing objects that implement serializable
+    "batik") #Working
         FILE=(batik-all.jar xml-apis-ext.jar crimson-1.1.3.jar xerces_2_5_0.jar xalan-2.6.0.jar)
         ;;
-    "eclipse") #Works for passing objects that implement serializable
+    "eclipse") #IllegalStateException
         FILE=(eclipse.jar)
         ;;
-    "fop") #xml-apis-1.3.04.jar throws IllegalAccessError / Works for passing objects that implement serializable
+    "fop") #Working
         FILE=(fop.jar avalon-framework-4.2.0.jar batik-all-1.7.jar commons-io-1.3.1.jar commons-logging-1.0.4.jar serializer-2.7.0.jar servlet-2.2.jar xalan-2.7.0.jar xercesImpl-2.7.1.jar xml-apis-ext-1.3.04.jar xmlgraphics-commons-1.3.1.jar)
         ;;
-    "h2") #Works for passing objects that implement serializable
+    "h2") #Working
         FILE=(dacapo-h2.jar derbyTesting.jar junit-3.8.1.jar h2-1.2.121.jar)
         ;;
-    "jython") #Still busted
+    "jython") #Working
         FILE=(jython.jar antlr-3.1.3.jar asm-3.1.jar asm-commons-3.1.jar constantine.jar guava-r07.jar jaffl.jar jline-0.9.95-SNAPSHOT.jar jnr-posix.jar)
         ;;
-    "luindex") #Works for passing objects that implement serializable
+    "luindex") #Working
         FILE=(dacapo-luindex.jar lucene-core-2.4.jar lucene-demos-2.4.jar)
         ;;
-    "lusearch-fix") #Works for passing objects that implement serializable
+    "lusearch-fix") #Working
         FILE=(dacapo-lusearch-fix.jar lucene-core-2.4.jar lucene-demos-2.4.jar)
         ;;
-    "lusearch") #Works for passing objects that implement serializable
+    "lusearch") #Working
         FILE=(dacapo-lusearch.jar lucene-core-2.4.jar lucene-demos-2.4.jar)
         ;;
-    "pmd") #xml-apis.jar throws IllegalAccessError / Works for passing objects that implement serializable
+    "pmd") #Working
         FILE=(pmd-4.2.5.jar jaxen-1.1.1.jar asm-3.1.jar junit-3.8.1.jar xercesImpl.jar)
         ;;
     "sunflow") #Working
@@ -54,13 +54,13 @@ case $1 in
     "tomcat") #Still busted
         FILE=(dacapo-tomcat.jar dacapo-digest.jar bootstrap.jar tomcat-juli.jar commons-daemon.jar commons-httpclient.jar commons-logging.jar commons-codec.jar)
         ;;
-    "tradebeans") #Works for passing objects that implement serializable but getting weird log4j errors
+    "tradebeans") #Working but getting weird log4j errors
         FILE=(daytrader.jar)
         ;;
     "tradesoap") #Same as tradebeans
         FILE=(daytrader.jar)
         ;;
-    "xalan") #xml-apis.jar throws IllegalAccessError / Works for passing objects that implement serializable
+    "xalan") #Working
         FILE=(dacapo-xalan.jar xalan.jar xercesImpl.jar serializer.jar)
         ;;
 esac

@@ -123,6 +123,7 @@ public class Log {
 				//ChroniclerJExportRunner.data.flush();
 			//} else {
 				//System.out.println(debug);
+				//ChroniclerJExportRunner.data.writeObject(debug);
 				String objectXML = xstream.toXML(toLog);
 				ChroniclerJExportRunner.data.writeObject(new XMLAlert());
 				ChroniclerJExportRunner.data.writeObject(objectXML);
