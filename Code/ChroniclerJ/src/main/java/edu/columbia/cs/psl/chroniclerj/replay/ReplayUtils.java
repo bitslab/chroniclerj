@@ -4,10 +4,9 @@ import java.io.*;
 import java.net.Socket;
 import java.util.HashMap;
 
-import edu.columbia.cs.psl.chroniclerj.CallbackInvocation;
-import edu.columbia.cs.psl.chroniclerj.ExportedLog;
-import edu.columbia.cs.psl.chroniclerj.ExportedSerializableLog;
-import edu.columbia.cs.psl.chroniclerj.Log;
+import com.thoughtworks.xstream.XStream;
+import edu.columbia.cs.psl.chroniclerj.*;
+import edu.columbia.cs.psl.chroniclerj.xstream.StaticReflectionProvider;
 
 public class ReplayUtils {
 	@SuppressWarnings({ "rawtypes", "unchecked" })
@@ -93,6 +92,13 @@ public class ReplayUtils {
 	static ObjectInputStream in;
 	static boolean connected = false;
 	private static Socket socket;
+	static final XStream xstream;
+
+	static {
+		xstream = new XStream(new StaticReflectionProvider());
+		// -10 is the same priority as the SerializationConverter, this converter will run first
+		xstream.registerConverter(new SerializationBugConverter(xstream), -10);
+	}
 
 	public static void connect() {
 		if (!connected) {
@@ -148,6 +154,8 @@ public class ReplayUtils {
 		Object data = null;
 		try {
 			data = in.readObject();
+			if (data != null && data.getClass().getSimpleName().equals("XMLAlert"))
+				data = xstream.fromXML((String) in.readObject());
 			//saveToText();
 		} catch (IOException | ClassNotFoundException e) {
 			e.printStackTrace();

@@ -19,7 +19,7 @@ public class Coordinator {
     static volatile boolean replayerStatus = false;
      */
     static XStream xstream = new XStream(new StaticReflectionProvider());
-    static boolean flag = false;
+    static boolean flag = true;
     static boolean serialFlag = false;
 
     public static void _main() {
@@ -45,7 +45,7 @@ public class Coordinator {
 
             if (flag) {
                 try {
-                    replayer = new ServerSocket(4231);
+                    replayer = new ServerSocket(1235);
                     replayerSocket = replayer.accept();
                     repOut = new ObjectOutputStream(replayerSocket.getOutputStream());
                     repOut.writeBoolean(true);
@@ -74,13 +74,14 @@ public class Coordinator {
                             }
                         }
                     }*/
-                    /*if (flag) {
+                    if (flag) {
                         if (input == null) {
                             repOut.writeObject(null);
                         } else {
                             switch (input.getClass().getSimpleName()) {
                                 case "XMLAlert":
-                                    System.out.println(recIn.readObject());
+                                    repOut.writeObject(input);
+                                    repOut.writeObject(recIn.readObject());
                                     break;
                                 case "Integer":
                                     repOut.writeInt((int) input);
@@ -110,9 +111,9 @@ public class Coordinator {
                                     repOut.writeObject(input);
                                     break;
                             }
-                        }*/
-                    //repOut.flush();
-                    //}
+                        }
+                        repOut.flush();
+                    }
                 }
             } catch (ClassNotFoundException e) {
                 e.printStackTrace();
