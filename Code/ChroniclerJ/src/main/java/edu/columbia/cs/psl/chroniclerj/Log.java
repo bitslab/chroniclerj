@@ -122,10 +122,10 @@ public class Log {
 				//ChroniclerJExportRunner.data.writeObject(toLog);
 				//ChroniclerJExportRunner.data.flush();
 			//} else {
-				//System.out.println(debug);
-				//ChroniclerJExportRunner.data.writeObject(debug);
+				System.out.println(debug);
 				String objectXML = xstream.toXML(toLog);
 				ChroniclerJExportRunner.data.writeObject(new XMLAlert());
+				ChroniclerJExportRunner.data.writeObject(debug);
 				ChroniclerJExportRunner.data.writeObject(objectXML);
 				ChroniclerJExportRunner.data.flush();
 			//}

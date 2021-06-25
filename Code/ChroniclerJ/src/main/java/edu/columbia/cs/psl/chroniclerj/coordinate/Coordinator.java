@@ -61,7 +61,7 @@ public class Coordinator {
             try {
                 while (true) {
                     Object input = recIn.readObject();
-                    //if (input instanceof String) {
+                   // if (input instanceof String) {
                     //   System.out.println(input);
                     //}
                     /*if (serialFlag) {
@@ -81,6 +81,7 @@ public class Coordinator {
                             switch (input.getClass().getSimpleName()) {
                                 case "XMLAlert":
                                     repOut.writeObject(input);
+                                    repOut.writeObject(recIn.readObject());
                                     repOut.writeObject(recIn.readObject());
                                     break;
                                 case "Integer":

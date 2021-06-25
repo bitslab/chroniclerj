@@ -154,8 +154,13 @@ public class ReplayUtils {
 		Object data = null;
 		try {
 			data = in.readObject();
-			if (data != null && data.getClass().getSimpleName().equals("XMLAlert"))
+			if (data != null && data.getClass().getSimpleName().equals("XMLAlert")) {
+				data = in.readObject();
+				System.out.println(data);
 				data = xstream.fromXML((String) in.readObject());
+				//if (data != null)
+				//	System.out.println(data.getClass().getName().toString());
+			}
 			//saveToText();
 		} catch (IOException | ClassNotFoundException e) {
 			e.printStackTrace();
