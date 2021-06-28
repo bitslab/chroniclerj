@@ -44,27 +44,28 @@ public class Log {
 		xstream = new XStream(new StaticReflectionProvider());
 		// -10 is the same priority as the SerializationConverter, this converter will run first
 		xstream.registerConverter(new SerializationBugConverter(xstream), -10);
+		xstream.setMode(XStream.ID_REFERENCES);
 	}
 
     public static Set<String> textSet = new HashSet<>();
-    public static File methodsLog = new File("/Users/david/Desktop/methods.txt");
+    public static File methodsLog = new File("/Users/david/Desktop/xml.txt");
 
     public static IdentityHashMap<Object, Integer> idMap = new IdentityHashMap<>();
     public static Integer count = 0;
 
-  /*  static int i = 0;
-    public static void saveToText(String debug, String log) {
-    	String combined = debug + "\t" + log;
+    static int i = 0;
+    public static void saveToText(String debug) {
+    	String combined = debug;
 		try (Writer writer = new BufferedWriter(new FileWriter(methodsLog, true))) {
-			if (!textSet.contains(combined)) {
+			//if (!textSet.contains(combined)) {
 				textSet.add(combined);
 				writer.write(combined);
 				writer.append("\n");
-			}
+			//}
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
-	}*/
+	}
 
 	public static class XMLAlert implements Serializable {
 		public XMLAlert() {
@@ -98,8 +99,7 @@ public class Log {
 			if (Log.aLog_fill >= Constants.MAX_LOG_SIZE) {
 				ChroniclerJExportRunner._export();
 			}
-			//if (toLog instanceof Serializable) {
-//				if (toLog.getClass().getName().endsWith("ICC_ColorSpace")) {
+			if (toLog instanceof Serializable) {
 //				    ByteArrayOutputStream baos = new ByteArrayOutputStream();
 //				    ObjectOutputStream oos = new ObjectOutputStream(baos);
 //
@@ -115,21 +115,22 @@ public class Log {
 //					} catch (ClassNotFoundException e) {
 //						System.out.println("Error");
 //					}
-//				}
-				//System.out.println(toLog.getClass().getName());
-				//System.out.println(debug);
-				//ChroniclerJExportRunner.data.writeObject(debug);
-				//ChroniclerJExportRunner.data.writeObject(toLog);
-				//ChroniclerJExportRunner.data.flush();
-			//} else {
+//				System.out.println(toLog.getClass().getName());
+//				System.out.println(debug);
+//				ChroniclerJExportRunner.data.writeObject(debug);
+				System.out.println("SERIALIZED");
+				ChroniclerJExportRunner.data.writeObject(toLog);
+				ChroniclerJExportRunner.data.flush();
+			} else {
 				System.out.println(debug);
 				String objectXML = xstream.toXML(toLog);
 				ChroniclerJExportRunner.data.writeObject(new XMLAlert());
 				ChroniclerJExportRunner.data.writeObject(debug);
 				ChroniclerJExportRunner.data.writeObject(objectXML);
 				ChroniclerJExportRunner.data.flush();
-			//}
-			//saveToText(debug, "OBJECT " + toLog.toString());
+			}
+			//if (debug.contains("Locale"))
+			//	saveToText(objectXML);
 		} catch (IOException | XStreamException e) {
 			e.printStackTrace();
 		} finally {

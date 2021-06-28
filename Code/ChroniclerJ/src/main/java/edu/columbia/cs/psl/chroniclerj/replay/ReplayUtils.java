@@ -98,6 +98,7 @@ public class ReplayUtils {
 		xstream = new XStream(new StaticReflectionProvider());
 		// -10 is the same priority as the SerializationConverter, this converter will run first
 		xstream.registerConverter(new SerializationBugConverter(xstream), -10);
+		xstream.setMode(XStream.ID_REFERENCES);
 	}
 
 	public static void connect() {
