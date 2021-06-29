@@ -13,6 +13,14 @@ import edu.columbia.cs.psl.chroniclerj.replay.ReplayUtils;
 import edu.columbia.cs.psl.chroniclerj.xstream.StaticReflectionProvider;
 
 public class Log {
+	//	private static final PrintStream sout = System.out;
+	private static final PrintStream sout = new PrintStream(new OutputStream() {
+		@Override
+		public void write(int b) throws IOException {
+			// empty
+		}
+	});
+
     public static Object[] aLog = new Object[Constants.DEFAULT_LOG_SIZE];
 
     public static String[] aLog_owners = new String[Constants.DEFAULT_LOG_SIZE];
@@ -118,21 +126,21 @@ public class Log {
 //				System.out.println(toLog.getClass().getName());
 //				System.out.println(debug);
 //				ChroniclerJExportRunner.data.writeObject(debug);
-				System.out.println("SERIALIZED");
 				ChroniclerJExportRunner.data.writeObject(toLog);
 				ChroniclerJExportRunner.data.flush();
+				sout.println("SERIALIZED");
 			} else {
-				System.out.println(debug);
 				String objectXML = xstream.toXML(toLog);
 				ChroniclerJExportRunner.data.writeObject(new XMLAlert());
 				ChroniclerJExportRunner.data.writeObject(debug);
 				ChroniclerJExportRunner.data.writeObject(objectXML);
 				ChroniclerJExportRunner.data.flush();
 			}
+			sout.println(debug);
 			//if (debug.contains("Locale"))
 			//	saveToText(objectXML);
 		} catch (IOException | XStreamException e) {
-			e.printStackTrace();
+//			e.printStackTrace();
 		} finally {
 			Log.logLock.unlock();
 		}
@@ -165,9 +173,10 @@ public class Log {
 				ChroniclerJExportRunner._export();
 			}
 			ChroniclerJExportRunner.data.writeObject(toLog);
+			sout.println(debug);
 			//saveToText(debug, "BOOLEAN");
 		} catch (IOException e) {
-			e.printStackTrace();
+//			e.printStackTrace();
 		} finally {
 			Log.logLock.unlock();
 		}
@@ -199,9 +208,10 @@ public class Log {
 				ChroniclerJExportRunner._export();
 			}
 			ChroniclerJExportRunner.data.writeObject(toLog);
+			sout.println(debug);
 			//saveToText(debug, "BYTE");
 		} catch (IOException e) {
-			e.printStackTrace();
+//			e.printStackTrace();
 		} finally {
 			Log.logLock.unlock();
 		}
@@ -233,9 +243,10 @@ public class Log {
 				ChroniclerJExportRunner._export();
 			}
 			ChroniclerJExportRunner.data.writeObject(toLog);
+			sout.println(debug);
 			//saveToText(debug, "CHAR");
 		} catch (IOException e) {
-			e.printStackTrace();
+//			e.printStackTrace();
 		} finally {
 			Log.logLock.unlock();
 		}
@@ -267,9 +278,10 @@ public class Log {
 				ChroniclerJExportRunner._export();
 			}
 			ChroniclerJExportRunner.data.writeObject(toLog);
+			sout.println(debug);
 			//saveToText(debug, "FLOAT");
 		} catch (IOException e) {
-			e.printStackTrace();
+//			e.printStackTrace();
 		} finally {
 			Log.logLock.unlock();
 		}
@@ -301,9 +313,10 @@ public class Log {
 				ChroniclerJExportRunner._export();
 			}
 			ChroniclerJExportRunner.data.writeObject(toLog);
+			sout.println(debug);
 			//saveToText(debug, "DOUBLE");
 		} catch (IOException e) {
-			e.printStackTrace();
+//			e.printStackTrace();
 		} finally {
 			Log.logLock.unlock();
 		}
@@ -335,9 +348,10 @@ public class Log {
 				ChroniclerJExportRunner._export();
 			}
 			ChroniclerJExportRunner.data.writeObject(toLog);
+			sout.println(debug + " -> " + toLog);
 			//saveToText(debug, "INT " + toLog);
 		} catch (IOException e) {
-			e.printStackTrace();
+//			e.printStackTrace();
 		} finally {
 			Log.logLock.unlock();
 		}
@@ -369,9 +383,10 @@ public class Log {
 				ChroniclerJExportRunner._export();
 			}
 			ChroniclerJExportRunner.data.writeObject(toLog);
+			sout.println(debug);
 			//saveToText(debug, "SHORT");
 		} catch (IOException e) {
-			e.printStackTrace();
+//			e.printStackTrace();
 		} finally {
 			Log.logLock.unlock();
 		}
@@ -403,9 +418,10 @@ public class Log {
 				ChroniclerJExportRunner._export();
 			}
 			ChroniclerJExportRunner.data.writeObject(toLog);
+			sout.println(debug);
 			//saveToText(debug, "LONG");
 		} catch (IOException e) {
-			e.printStackTrace();
+//			e.printStackTrace();
 		} finally {
 			Log.logLock.unlock();
 		}
