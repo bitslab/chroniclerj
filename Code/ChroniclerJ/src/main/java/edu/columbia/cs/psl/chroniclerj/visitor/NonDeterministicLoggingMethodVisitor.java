@@ -171,16 +171,53 @@ public class NonDeterministicLoggingMethodVisitor extends CloningAdviceAdapter {
                     super.visitMethodInsn(invokeOpcode, className, m.getCapturePrefix() + "_capture",
                             captureDesc, false);
                     logValueAtTopOfStackToArray(m.getLogClassName(), m.getLogFieldName(), m
-                            .getLogFieldType().getDescriptor(), returnType, true, owner + "."
-                            + name + "\t" + desc + "\t\t" + className + "." + this.name, false,
+                                    .getLogFieldType().getDescriptor(), returnType, true, owner + "."
+                                    + name + "\t" + desc + "\t\t" + className + "." + this.name, false,
                             true);
                 } else {
                     super.visitMethodInsn(opcode, owner, name, desc, itfc);
                     logValueAtTopOfStackToArray(m.getLogClassName(), m.getLogFieldName(), m
-                            .getLogFieldType().getDescriptor(), returnType, true, owner + "."
-                            + name + "\t" + desc + "\t\t" + className + "." + this.name, false,
+                                    .getLogFieldType().getDescriptor(), returnType, true, owner + "."
+                                    + name + "\t" + desc + "\t\t" + className + "." + this.name, false,
                             true);
                 }
+            } else if ((!constructor || isFirstConstructor || superInitialized)
+                        && returnType.equals(Type.VOID_TYPE)
+                        && nonDeterministicMethods.contains(owner + "." + name + ":" + desc)
+                        && !ignoredNDMethods.contains(owner + "." + name + desc + this.className + "."
+                        + this.name)) {
+
+                logger.debug("Adding field in MV to list " + m.getLogFieldName());
+                methodCallsToClear.add(m);
+                Type[] args = Type.getArgumentTypes(desc);
+                boolean hasArray = false;
+                for (Type t : args)
+                    if (t.getSort() == Type.ARRAY && !name.contains("write")
+                            && !name.contains("invoke") && t.getElementType().equals(Type.BYTE_TYPE))
+                        hasArray = true;
+                if (hasArray) { // TODO uncomment this block
+                    captureMethodsToGenerate.put(m, new MethodInsnNode(opcode, owner, name, desc, itfc));
+
+                    String captureDesc = desc;
+
+                    int invokeOpcode = Opcodes.INVOKESTATIC;
+                    if (opcode == Opcodes.INVOKESPECIAL && !name.equals("<init>")) {
+                        invokeOpcode = Opcodes.INVOKESPECIAL;
+                    } else if (opcode != Opcodes.INVOKESTATIC) {
+                        // Need to put owner of the method on the top of the
+                        // args list
+                        captureDesc = "(L" + owner + ";";
+                        for (Type t : args)
+                            captureDesc += t.getDescriptor();
+                        captureDesc += ")" + Type.getReturnType(desc).getDescriptor();
+                    }
+                    super.visitMethodInsn(invokeOpcode, className, m.getCapturePrefix() + "_capture",
+                            captureDesc, false);
+//                    super.visitMethodInsn(opcode, owner, name, desc, itfc);
+                } else {
+                    super.visitMethodInsn(opcode, owner, name, desc, itfc);
+                }
+
             } else if (opcode == INVOKESPECIAL
                     && name.equals("<init>")
                     && nonDeterministicMethods.contains(owner + "." + name + ":" + desc)

@@ -9,6 +9,15 @@ import edu.columbia.cs.psl.chroniclerj.*;
 import edu.columbia.cs.psl.chroniclerj.xstream.StaticReflectionProvider;
 
 public class ReplayUtils {
+
+//	private static final PrintStream sout = System.out;
+	private static final PrintStream sout = new PrintStream(new OutputStream() {
+	@Override
+	public void write(int b) throws IOException {
+		// empty
+	}
+});
+
 	@SuppressWarnings({ "rawtypes", "unchecked" })
 	public static int getNextIndex(HashMap replayIndexMap, String[] threadEntries, int fill) {
 		String threadName = Thread.currentThread().getName();
@@ -157,7 +166,7 @@ public class ReplayUtils {
 			data = in.readObject();
 			if (data != null && data.getClass().getSimpleName().equals("XMLAlert")) {
 				data = in.readObject();
-				System.out.println(data);
+				sout.println(data);
 				data = xstream.fromXML((String) in.readObject());
 				if (data != null && !data.getClass().equals(c)) {
 					boolean eq = false;
@@ -184,6 +193,7 @@ public class ReplayUtils {
 		int data = 0;
 		try {
 			data = in.readInt();
+			sout.println("Read int: " + data);
 			//saveToText();
 		} catch (IOException e) {
 			e.printStackTrace();
