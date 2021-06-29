@@ -1,6 +1,7 @@
 
 package edu.columbia.cs.psl.chroniclerj.replay;
 
+import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.HashMap;
 
@@ -10,7 +11,6 @@ import org.apache.log4j.Logger;
 import org.objectweb.asm.*;
 import org.objectweb.asm.commons.AnalyzerAdapter;
 import org.objectweb.asm.commons.InstructionAdapter;
-import org.objectweb.asm.commons.Method;
 import org.objectweb.asm.tree.MethodInsnNode;
 
 import edu.columbia.cs.psl.chroniclerj.CallbackRegistry;
@@ -210,7 +210,8 @@ public class NonDeterministicReplayMethodVisitor extends InstructionAdapter impl
 		switch (t.getSort()) {
 		case Type.OBJECT:
 		case Type.ARRAY:
-			super.visitMethodInsn(INVOKESTATIC, Type.getInternalName(ReplayUtils.class), "getNextObject", "()Ljava/lang/Object;", false);
+		    super.visitLdcInsn(t);
+			super.visitMethodInsn(INVOKESTATIC, Type.getInternalName(ReplayUtils.class), "getNextObject", "(Ljava/lang/Class;)Ljava/lang/Object;", false);
 			super.visitTypeInsn(CHECKCAST, t.getInternalName());
 			break;	
 		default:

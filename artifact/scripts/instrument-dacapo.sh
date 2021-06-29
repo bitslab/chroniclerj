@@ -24,7 +24,7 @@ case $1 in
     "batik") #Working
         FILE=(batik-all.jar xml-apis-ext.jar crimson-1.1.3.jar xerces_2_5_0.jar xalan-2.6.0.jar)
         ;;
-    "eclipse") #IllegalStateException
+    "eclipse") #VerifyError Illegal type in constant pool
         FILE=(eclipse.jar)
         ;;
     "fop") #Working
@@ -91,7 +91,6 @@ else
     cp rep/$jfile $DACAPO_REP_INSTALL/jar/$jfile
     done
     rm -rf rec rep
-
 fi
 
 rm -rf tmp2
