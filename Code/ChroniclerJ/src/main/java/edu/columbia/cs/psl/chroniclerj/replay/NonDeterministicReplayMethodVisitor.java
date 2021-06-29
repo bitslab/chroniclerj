@@ -150,10 +150,18 @@ public class NonDeterministicReplayMethodVisitor extends InstructionAdapter impl
                 Type[] args = Type.getArgumentTypes(desc);
                 for (int i = args.length - 1; i >= 0; i--) {
                     Type t = args[i];
-                    if (t.getSize() == 2)
-                        mv.visitInsn(POP2);
-                    else
-                        mv.visitInsn(POP);
+                    if (t.getSort() == Type.ARRAY && !name.contains("write") && !name.contains("invoke") && t.getElementType().equals(Type.BYTE_TYPE)) {
+                        getNextReplay(t);
+                        super.visitInsn(DUP);
+                        super.visitInsn(ARRAYLENGTH);
+                        //Copy the contents of the replay'ed array into the one on stack.
+                        super.visitMethodInsn(INVOKESTATIC, Type.getInternalName(ReplayUtils.class), "copyInto", "(Ljava/lang/Object;Ljava/lang/Object;I)V", false);
+                    } else {
+                        if (t.getSize() == 2)
+                            mv.visitInsn(POP2);
+                        else
+                            mv.visitInsn(POP);
+                    }
                 }
                 if (opcode != INVOKESTATIC)
                     mv.visitInsn(POP);
