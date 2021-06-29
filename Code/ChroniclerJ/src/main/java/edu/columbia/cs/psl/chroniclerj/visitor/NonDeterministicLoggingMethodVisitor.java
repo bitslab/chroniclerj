@@ -197,8 +197,11 @@ public class NonDeterministicLoggingMethodVisitor extends CloningAdviceAdapter {
 //                                    + this.name, false, true);
                     super.visitInsn(NOP);
 
-            } else
+            } else {
                 super.visitMethodInsn(opcode, owner, name, desc, itfc);
+                if(constructor && !superInitialized && opcode == INVOKESPECIAL && name.equals("<init>"))
+                    superInitialized = true;
+            }
 
             if (constructor && !init) {
                 init = true;
