@@ -148,7 +148,7 @@ public class ReplayUtils {
 			}
 	}
 	static int i = 0;*/
-	public static Object getNextObject(Class c) {
+	public static Object getNextObject() {
 		/*Log.logLock.lock();
 		try {
 			int idx = ReplayUtils.getNextIndexO(ExportedLog.aLog_replayIndex, ExportedLog.aLog_owners, ExportedLog.aLog_fill, ExportedLog.aLog);
@@ -168,7 +168,7 @@ public class ReplayUtils {
 				data = in.readObject();
 				sout.println(data);
 				data = xstream.fromXML((String) in.readObject());
-				if (data != null && !data.getClass().equals(c)) {
+				/*if (data != null && !data.getClass().equals(c)) {
 					boolean eq = false;
 					Class superclass = data.getClass().getSuperclass();
 					while (superclass != null) {
@@ -180,7 +180,7 @@ public class ReplayUtils {
 					}
 					if (!eq)
 						System.out.println("EXPECTING CLASS: " + c.getName() + "\t RECEIVED: " + data.getClass().getName());
-				}
+				}*/
 			}
 			//saveToText();
 		} catch (IOException | ClassNotFoundException e) {

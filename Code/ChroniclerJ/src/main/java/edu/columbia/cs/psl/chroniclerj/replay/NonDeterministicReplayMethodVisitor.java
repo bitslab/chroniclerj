@@ -218,8 +218,8 @@ public class NonDeterministicReplayMethodVisitor extends InstructionAdapter impl
 		switch (t.getSort()) {
 		case Type.OBJECT:
 		case Type.ARRAY:
-		    super.visitLdcInsn(t);
-			super.visitMethodInsn(INVOKESTATIC, Type.getInternalName(ReplayUtils.class), "getNextObject", "(Ljava/lang/Class;)Ljava/lang/Object;", false);
+		    //super.visitLdcInsn(t);
+			super.visitMethodInsn(INVOKESTATIC, Type.getInternalName(ReplayUtils.class), "getNextObject", "()Ljava/lang/Object;", false);
 			super.visitTypeInsn(CHECKCAST, t.getInternalName());
 			break;	
 		default:
