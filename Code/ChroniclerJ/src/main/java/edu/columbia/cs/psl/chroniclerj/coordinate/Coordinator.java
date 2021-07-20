@@ -19,7 +19,7 @@ public class Coordinator {
     static volatile boolean replayerStatus = false;
      */
     static XStream xstream = new XStream(new StaticReflectionProvider());
-    static boolean flag = true;
+    static boolean flag = false;
     static boolean serialFlag = false;
 
     public static void _main() {

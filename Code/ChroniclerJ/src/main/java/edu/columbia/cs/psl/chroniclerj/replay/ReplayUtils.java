@@ -148,6 +148,13 @@ public class ReplayUtils {
 			}
 	}
 	static int i = 0;*/
+
+	public static InputStream wrap(InputStream in) {
+		if (in != null)
+			System.out.println(in.getClass().getName());
+		return in;
+	}
+
 	public static Object getNextObject() {
 		/*Log.logLock.lock();
 		try {
@@ -166,8 +173,9 @@ public class ReplayUtils {
 			data = in.readObject();
 			if (data != null && data.getClass().getSimpleName().equals("XMLAlert")) {
 				data = in.readObject();
-				sout.println(data);
-				data = xstream.fromXML((String) in.readObject());
+				System.out.println(data);
+				data = in.readObject();
+				data = xstream.fromXML((String) data);
 				/*if (data != null && !data.getClass().equals(c)) {
 					boolean eq = false;
 					Class superclass = data.getClass().getSuperclass();

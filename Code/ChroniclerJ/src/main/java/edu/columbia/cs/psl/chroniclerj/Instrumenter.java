@@ -1,18 +1,15 @@
 
 package edu.columbia.cs.psl.chroniclerj;
 
-import java.io.ByteArrayOutputStream;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.InputStream;
+import java.io.*;
+import java.lang.reflect.Constructor;
+import java.lang.reflect.Method;
+import java.lang.reflect.Modifier;
 import java.net.URL;
 import java.net.URLClassLoader;
 import java.nio.channels.FileChannel;
-import java.util.Enumeration;
-import java.util.Scanner;
+import java.nio.charset.StandardCharsets;
+import java.util.*;
 import java.util.jar.JarEntry;
 import java.util.jar.JarFile;
 import java.util.jar.JarOutputStream;
@@ -22,14 +19,16 @@ import java.util.zip.ZipOutputStream;
 
 import edu.columbia.cs.psl.chroniclerj.visitor.NDCombinedClassVisitor;
 import org.apache.log4j.Logger;
-import org.objectweb.asm.ClassReader;
-import org.objectweb.asm.ClassWriter;
+import org.objectweb.asm.*;
 import org.objectweb.asm.commons.SerialVersionUIDAdder;
 import org.objectweb.asm.util.CheckClassAdapter;
 
 import edu.columbia.cs.psl.chroniclerj.PreMain.ChroniclerTransformer;
 import edu.columbia.cs.psl.chroniclerj.visitor.CallbackDuplicatingClassVisitor;
 import edu.columbia.cs.psl.chroniclerj.visitor.NonDeterministicLoggingClassVisitor;
+
+import static org.objectweb.asm.Opcodes.*;
+import static org.objectweb.asm.Opcodes.IRETURN;
 
 public class Instrumenter {
     public static ClassLoader loader;
@@ -67,7 +66,7 @@ public class Instrumenter {
         }
     }
 
-	static ChroniclerTransformer transformer = new ChroniclerTransformer();
+	public static ChroniclerTransformer transformer = new ChroniclerTransformer();
 
     private static byte[] instrumentClass(InputStream is) {
         try {
@@ -85,6 +84,115 @@ public class Instrumenter {
 				System.err.println("on " + lastInstrumentedClass);
 				System.exit(-1);
 			}
+            File f = new File("/Users/david/Desktop/IStreamClasses.txt");
+            for (Type t : transformer.classesToGenerate) {
+                cw = new ClassWriter(ClassWriter.COMPUTE_MAXS);
+                MethodVisitor methodVisitor;
+
+                String[] splitName = t.getInternalName().split("/");
+                String newClass = "edu/columbia/cs/psl/chroniclerj/visitor/" + splitName[splitName.length - 1] + "$$InputStream";
+                Set classesInFile = new HashSet<String>();
+                String nextLine;
+                try(BufferedReader br = new BufferedReader(new FileReader(f))) {
+                    while ((nextLine = br.readLine()) != null)
+                        classesInFile.add(nextLine);
+                }
+                try(BufferedWriter bw = new BufferedWriter(new FileWriter(f, true))) {
+                    if (!classesInFile.contains(splitName[splitName.length - 1])) {
+                        bw.write(splitName[splitName.length - 1]);
+                        bw.newLine();
+                    }
+                }
+                cw.visit(V1_8, ACC_PUBLIC | ACC_SUPER, newClass, null, t.getInternalName(), null);
+                /*Method[] methods =  Class.forName(t.getClassName()).getDeclaredMethods();
+                for (Method method : methods) {
+                    Type methodType = Type.getType(method);
+                    Type[] methodArgs = methodType.getArgumentTypes();
+                    if(methodType.getInternalName().contains("read")) {
+                        //Always null arguments for signature and exceptions possibly incorrect
+                        methodVisitor = cw.visitMethod(method.getModifiers(), method.getName(), methodType.getDescriptor(), null, null);
+                        methodVisitor.visitCode();
+                    }
+                }*/
+                Constructor[] constructors = Class.forName(t.getClassName()).getDeclaredConstructors();
+                for(Constructor cons : constructors) {
+                    Type consType = Type.getType(cons);
+                    Type[] consArgs = consType.getArgumentTypes();
+                    methodVisitor = cw.visitMethod(ACC_PUBLIC, "<init>", consType.getDescriptor(), null, null);
+                    methodVisitor.visitCode();
+                    methodVisitor.visitVarInsn(ALOAD, 0);
+                    int i = 1;
+                    for (Type consArg : consArgs) {
+                        methodVisitor.visitVarInsn(consArg.getOpcode(ILOAD), i);
+                        i++;
+                    }
+                    methodVisitor.visitMethodInsn(INVOKESPECIAL, t.getInternalName(), "<init>", consType.getDescriptor(), false);
+                    methodVisitor.visitInsn(RETURN);
+                    methodVisitor.visitMaxs(i, i);
+                    methodVisitor.visitEnd();
+                }
+
+                Method method;
+                {
+                    try {
+                        method = Class.forName(t.getClassName()).getMethod("read");
+                        if (!Modifier.isFinal(method.getModifiers())) {
+                            methodVisitor = cw.visitMethod(ACC_PUBLIC | ACC_SYNCHRONIZED, "read", "()I", null, null);
+                            methodVisitor.visitCode();
+                            methodVisitor.visitVarInsn(ALOAD, 0);
+                            methodVisitor.visitMethodInsn(INVOKESPECIAL, t.getInternalName(), "read", "()I", false);
+                            methodVisitor.visitInsn(IRETURN);
+                            methodVisitor.visitMaxs(1, 1);
+                            methodVisitor.visitEnd();
+                        }
+                    } catch (NoSuchMethodException e) {}
+                }
+                Class[] parameters;
+                {
+                    parameters = new Class[3];
+                    parameters[0] = byte[].class;
+                    parameters[1] = int.class;
+                    parameters[2] = int.class;
+                    try {
+                        method = Class.forName(t.getClassName()).getMethod("read", parameters);
+                        if (!Modifier.isFinal(method.getModifiers())) {
+                            methodVisitor = cw.visitMethod(ACC_PUBLIC | ACC_SYNCHRONIZED, "read", "([BII)I", null, null);
+                            methodVisitor.visitCode();
+                            methodVisitor.visitVarInsn(ALOAD, 0);
+                            methodVisitor.visitVarInsn(ALOAD, 1);
+                            methodVisitor.visitVarInsn(ILOAD, 2);
+                            methodVisitor.visitVarInsn(ILOAD, 3);
+                            methodVisitor.visitMethodInsn(INVOKESPECIAL, t.getInternalName(), "read", "([BII)I", false);
+                            methodVisitor.visitInsn(IRETURN);
+                            methodVisitor.visitMaxs(4, 4);
+                            methodVisitor.visitEnd();
+                        }
+                    } catch (NoSuchMethodException e) {}
+                }
+                {
+                    parameters = new Class[1];
+                    parameters[0] = byte[].class;
+                    try {
+                        method = Class.forName(t.getClassName()).getMethod("read", parameters);
+                        if (!Modifier.isFinal(method.getModifiers())) {
+                            methodVisitor = cw.visitMethod(ACC_PUBLIC, "read", "([B)I", null, new String[]{"java/io/IOException"});
+                            methodVisitor.visitCode();
+                            methodVisitor.visitVarInsn(ALOAD, 0);
+                            methodVisitor.visitVarInsn(ALOAD, 1);
+                            methodVisitor.visitMethodInsn(INVOKESPECIAL, t.getInternalName(), "read", "([B)I", false);
+                            methodVisitor.visitInsn(IRETURN);
+                            methodVisitor.visitMaxs(2, 2);
+                            methodVisitor.visitEnd();
+                        }
+                    } catch (NoSuchMethodException e) {}
+                }
+                cw.visitEnd();
+                byte[] bytes = cw.toByteArray();
+                File newDir = new File("/Users/david/IdeaProjects/chroniclerj/Code/ChroniclerJ/src/main/java/" + newClass + ".class");
+                try(FileOutputStream fos = new FileOutputStream(newDir)) {
+                    fos.write(bytes);
+                }
+            }
 			return b;
         } catch (Exception ex) {
             logger.error("Exception processing class: " + lastInstrumentedClass, ex);

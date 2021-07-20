@@ -1,10 +1,7 @@
 
 package edu.columbia.cs.psl.chroniclerj.visitor;
 
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Scanner;
+import java.util.*;
 
 import org.apache.log4j.Logger;
 import org.objectweb.asm.ClassVisitor;
@@ -69,7 +66,7 @@ public class NonDeterministicLoggingClassVisitor extends ClassVisitor implements
     }
 
     private boolean isFirstConstructor = true;
-
+    Set<Type> classesToGenerate = new HashSet<>();
     
     @Override
     public MethodVisitor visitMethod(int acc, String name, String desc, String signature,
@@ -105,7 +102,7 @@ public class NonDeterministicLoggingClassVisitor extends ClassVisitor implements
             // analyzer);
         	AnalyzerAdapter analyzer = new AnalyzerAdapter(className, acc, name, desc, smv);
             NonDeterministicLoggingMethodVisitor cloningMV = new NonDeterministicLoggingMethodVisitor(
-            		analyzer, acc, name, desc, className, superName, isFirstConstructor, analyzer);
+            		analyzer, acc, name, desc, className, superName, isFirstConstructor, analyzer, classesToGenerate);
             if (name.equals("<init>"))
                 isFirstConstructor = false;
             cloningMV.setClassVisitor(this);

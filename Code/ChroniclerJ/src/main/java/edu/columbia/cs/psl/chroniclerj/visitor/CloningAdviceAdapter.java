@@ -43,6 +43,7 @@ public class CloningAdviceAdapter extends InstructionAdapter implements Opcodes 
         immutableClasses.add("Ljava/net/InetAddress;");
         immutableClasses.add("Ljava/util/TimeZone;");
         immutableClasses.add("Ljava/util/zip/ZipEntry;");
+        immutableClasses.add("Ljava/util/Set;");
         immutableClasses.add("Z");
         immutableClasses.add("B");
         immutableClasses.add("C");

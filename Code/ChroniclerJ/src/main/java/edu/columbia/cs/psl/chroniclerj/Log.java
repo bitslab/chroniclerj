@@ -107,7 +107,7 @@ public class Log {
 			if (Log.aLog_fill >= Constants.MAX_LOG_SIZE) {
 				ChroniclerJExportRunner._export();
 			}
-			if (toLog instanceof Serializable) {
+//			if (toLog instanceof Serializable) {
 //				    ByteArrayOutputStream baos = new ByteArrayOutputStream();
 //				    ObjectOutputStream oos = new ObjectOutputStream(baos);
 //
@@ -126,17 +126,17 @@ public class Log {
 //				System.out.println(toLog.getClass().getName());
 //				System.out.println(debug);
 //				ChroniclerJExportRunner.data.writeObject(debug);
-				ChroniclerJExportRunner.data.writeObject(toLog);
-				ChroniclerJExportRunner.data.flush();
-				sout.println("SERIALIZED");
-			} else {
+//				ChroniclerJExportRunner.data.writeObject(toLog);
+//				ChroniclerJExportRunner.data.flush();
+//				sout.println("SERIALIZED");
+//			} else {
 				String objectXML = xstream.toXML(toLog);
 				ChroniclerJExportRunner.data.writeObject(new XMLAlert());
 				ChroniclerJExportRunner.data.writeObject(debug);
 				ChroniclerJExportRunner.data.writeObject(objectXML);
 				ChroniclerJExportRunner.data.flush();
-			}
-			sout.println(debug);
+//			}
+			System.out.println(debug);
 			//if (debug.contains("Locale"))
 			//	saveToText(objectXML);
 		} catch (IOException | XStreamException e) {

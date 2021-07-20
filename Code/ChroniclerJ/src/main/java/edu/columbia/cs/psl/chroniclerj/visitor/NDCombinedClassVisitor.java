@@ -14,10 +14,9 @@ import org.objectweb.asm.tree.FieldNode;
 import org.objectweb.asm.tree.FrameNode;
 import org.objectweb.asm.tree.MethodInsnNode;
 
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Scanner;
+import java.util.*;
+
+import static edu.columbia.cs.psl.chroniclerj.Instrumenter.transformer;
 
 public class NDCombinedClassVisitor extends ClassVisitor implements Opcodes {
 
@@ -65,6 +64,7 @@ public class NDCombinedClassVisitor extends ClassVisitor implements Opcodes {
     }
 
     private boolean isFirstConstructor = true;
+    public static Set<Type> classesToGenerate = transformer.classesToGenerate;
 
     @Override
     public MethodVisitor visitMethod(int acc, String name, String desc, String signature, String[] exceptions) {
@@ -88,7 +88,7 @@ public class NDCombinedClassVisitor extends ClassVisitor implements Opcodes {
                     && !name.equals(Constants.SET_FIELDS_METHOD_NAME)
                     && !className.startsWith("com/thoughtworks")) {
                 AnalyzerAdapter analyzer = new AnalyzerAdapter(className, acc, name, desc, smv);
-                NonDeterministicLoggingMethodVisitor cloningMV = new NonDeterministicLoggingMethodVisitor(analyzer, acc, name, desc, className, superName, isFirstConstructor, analyzer);
+                NonDeterministicLoggingMethodVisitor cloningMV = new NonDeterministicLoggingMethodVisitor(analyzer, acc, name, desc, className, superName, isFirstConstructor, analyzer, classesToGenerate );
                 if (name.equals("<init>"))
                     isFirstConstructor = false;
                 cloningMV.setClassVisitor(this);
@@ -224,6 +224,94 @@ public class NDCombinedClassVisitor extends ClassVisitor implements Opcodes {
                 fn.accept(this);
             }
         }
+
+        /*if (lrFlag) {
+            for (Type t : this.classesToGenerate) {
+                MethodVisitor methodVisitor;
+
+                String[] splitName = t.getInternalName().split("/");
+                String newClass = "edu/columbia/cs/psl/chroniclerj/visitor/" + splitName[splitName.length - 1] + "$$InputStream";
+                this.visit(V1_8, ACC_PUBLIC | ACC_SUPER, newClass, null, t.getInternalName(), null);
+
+                this.visitSource("WrapInputStream.java", null);
+
+                {
+                    methodVisitor = this.visitMethod(ACC_PUBLIC, "<init>", "([B)V", null, null);
+                    methodVisitor.visitCode();
+                    Label label0 = new Label();
+                    methodVisitor.visitLabel(label0);
+                    methodVisitor.visitLineNumber(8, label0);
+                    methodVisitor.visitVarInsn(ALOAD, 0);
+                    methodVisitor.visitVarInsn(ALOAD, 1);
+                    methodVisitor.visitMethodInsn(INVOKESPECIAL, "java/io/ByteArrayInputStream", "<init>", "([B)V", false);
+                    Label label1 = new Label();
+                    methodVisitor.visitLabel(label1);
+                    methodVisitor.visitLineNumber(9, label1);
+                    methodVisitor.visitInsn(RETURN);
+                    Label label2 = new Label();
+                    methodVisitor.visitLabel(label2);
+                    methodVisitor.visitLocalVariable("this", "Ledu/columbia/cs/psl/chroniclerj/visitor/WrapInputStream;", null, label0, label2, 0);
+                    methodVisitor.visitLocalVariable("buf", "[B", null, label0, label2, 1);
+                    methodVisitor.visitMaxs(2, 2);
+                    methodVisitor.visitEnd();
+                }
+                {
+                    methodVisitor = this.visitMethod(ACC_PUBLIC | ACC_SYNCHRONIZED, "read", "()I", null, null);
+                    methodVisitor.visitCode();
+                    Label label0 = new Label();
+                    methodVisitor.visitLabel(label0);
+                    methodVisitor.visitLineNumber(13, label0);
+                    methodVisitor.visitVarInsn(ALOAD, 0);
+                    methodVisitor.visitMethodInsn(INVOKESPECIAL, "java/io/ByteArrayInputStream", "read", "()I", false);
+                    methodVisitor.visitInsn(IRETURN);
+                    Label label1 = new Label();
+                    methodVisitor.visitLabel(label1);
+                    methodVisitor.visitLocalVariable("this", "Ledu/columbia/cs/psl/chroniclerj/visitor/WrapInputStream;", null, label0, label1, 0);
+                    methodVisitor.visitMaxs(1, 1);
+                    methodVisitor.visitEnd();
+                }
+                {
+                    methodVisitor = this.visitMethod(ACC_PUBLIC | ACC_SYNCHRONIZED, "read", "([BII)I", null, null);
+                    methodVisitor.visitCode();
+                    Label label0 = new Label();
+                    methodVisitor.visitLabel(label0);
+                    methodVisitor.visitLineNumber(18, label0);
+                    methodVisitor.visitVarInsn(ALOAD, 0);
+                    methodVisitor.visitVarInsn(ALOAD, 1);
+                    methodVisitor.visitVarInsn(ILOAD, 2);
+                    methodVisitor.visitVarInsn(ILOAD, 3);
+                    methodVisitor.visitMethodInsn(INVOKESPECIAL, "java/io/ByteArrayInputStream", "read", "([BII)I", false);
+                    methodVisitor.visitInsn(IRETURN);
+                    Label label1 = new Label();
+                    methodVisitor.visitLabel(label1);
+                    methodVisitor.visitLocalVariable("this", "Ledu/columbia/cs/psl/chroniclerj/visitor/WrapInputStream;", null, label0, label1, 0);
+                    methodVisitor.visitLocalVariable("b", "[B", null, label0, label1, 1);
+                    methodVisitor.visitLocalVariable("off", "I", null, label0, label1, 2);
+                    methodVisitor.visitLocalVariable("len", "I", null, label0, label1, 3);
+                    methodVisitor.visitMaxs(4, 4);
+                    methodVisitor.visitEnd();
+                }
+                {
+                    methodVisitor = this.visitMethod(ACC_PUBLIC, "read", "([B)I", null, new String[]{"java/io/IOException"});
+                    methodVisitor.visitCode();
+                    Label label0 = new Label();
+                    methodVisitor.visitLabel(label0);
+                    methodVisitor.visitLineNumber(23, label0);
+                    methodVisitor.visitVarInsn(ALOAD, 0);
+                    methodVisitor.visitVarInsn(ALOAD, 1);
+                    methodVisitor.visitMethodInsn(INVOKESPECIAL, "java/io/ByteArrayInputStream", "read", "([B)I", false);
+                    methodVisitor.visitInsn(IRETURN);
+                    Label label1 = new Label();
+                    methodVisitor.visitLabel(label1);
+                    methodVisitor.visitLocalVariable("this", "Ledu/columbia/cs/psl/chroniclerj/visitor/WrapInputStream;", null, label0, label1, 0);
+                    methodVisitor.visitLocalVariable("b", "[B", null, label0, label1, 1);
+                    methodVisitor.visitMaxs(2, 2);
+                    methodVisitor.visitEnd();
+                }
+                this.visitEnd();
+            }
+        }*/
+
         super.visitEnd();
     }
 

@@ -8,17 +8,16 @@ import java.io.PrintWriter;
 import java.lang.instrument.ClassFileTransformer;
 import java.lang.instrument.IllegalClassFormatException;
 import java.lang.instrument.Instrumentation;
+import java.nio.file.Paths;
 import java.security.ProtectionDomain;
+import java.util.HashSet;
 import java.util.Scanner;
+import java.util.Set;
 
 import edu.columbia.cs.psl.chroniclerj.replay.ReplayUtils;
 import edu.columbia.cs.psl.chroniclerj.visitor.NDCombinedClassVisitor;
 import edu.columbia.cs.psl.chroniclerj.visitor.WrapInputOutputStreamClassVisitor;
-import org.objectweb.asm.ClassReader;
-import org.objectweb.asm.ClassVisitor;
-import org.objectweb.asm.ClassWriter;
-import org.objectweb.asm.MethodVisitor;
-import org.objectweb.asm.Opcodes;
+import org.objectweb.asm.*;
 import org.objectweb.asm.commons.JSRInlinerAdapter;
 import org.objectweb.asm.commons.SerialVersionUIDAdder;
 import org.objectweb.asm.tree.ClassNode;
@@ -27,6 +26,9 @@ import org.objectweb.asm.util.TraceClassVisitor;
 
 import edu.columbia.cs.psl.chroniclerj.replay.ReplayRunner;
 import edu.columbia.cs.psl.chroniclerj.visitor.CallbackDuplicatingClassVisitor;
+
+import static org.objectweb.asm.Opcodes.*;
+
 
 public class PreMain {
 	public static boolean replay;
@@ -42,7 +44,8 @@ public class PreMain {
 		}
 	}
 
-	static class ChroniclerTransformer implements ClassFileTransformer {
+	public static class ChroniclerTransformer implements ClassFileTransformer {
+		public static Set<Type> classesToGenerate = new HashSet<>();
 		@Override
 		public byte[] transform(ClassLoader loader, String className, Class<?> classBeingRedefined, ProtectionDomain protectionDomain, byte[] classfileBuffer) throws IllegalClassFormatException {
 			// Instrumenter.loader = loader;

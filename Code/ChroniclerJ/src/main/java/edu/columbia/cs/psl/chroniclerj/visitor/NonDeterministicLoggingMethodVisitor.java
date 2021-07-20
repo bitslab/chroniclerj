@@ -1,10 +1,13 @@
 
 package edu.columbia.cs.psl.chroniclerj.visitor;
 
+import java.io.InputStream;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Scanner;
+import java.util.Set;
 
+import edu.columbia.cs.psl.chroniclerj.replay.ReplayUtils;
 import org.apache.log4j.Logger;
 import org.objectweb.asm.*;
 import org.objectweb.asm.commons.AnalyzerAdapter;
@@ -75,9 +78,10 @@ public class NonDeterministicLoggingMethodVisitor extends CloningAdviceAdapter {
     }
 
     private boolean isFirstConstructor;
+    Set<Type> classesToGenerate;
 
     protected NonDeterministicLoggingMethodVisitor(MethodVisitor mv, int access,
-            String name, String desc, String className, String superName, boolean isFirstConstructor, AnalyzerAdapter analyzer) {
+                                                   String name, String desc, String className, String superName, boolean isFirstConstructor, AnalyzerAdapter analyzer, Set<Type> classesToGenerate) {
         super(mv, access, name, desc, className, analyzer);
         this.name = name;
         this.desc = desc;
@@ -87,6 +91,7 @@ public class NonDeterministicLoggingMethodVisitor extends CloningAdviceAdapter {
         this.isStatic = (access & Opcodes.ACC_STATIC) != 0;
         this.constructor = "<init>".equals(name);
         this.isFirstConstructor = isFirstConstructor;
+        this.classesToGenerate = classesToGenerate;
     }
 
     private ClassVisitor parent;
@@ -135,11 +140,36 @@ public class NonDeterministicLoggingMethodVisitor extends CloningAdviceAdapter {
             MethodCall m = new MethodCall(this.name, this.desc, this.className, pc, lineNumber,
                     owner, name, desc, isStatic);
             Type returnType = Type.getMethodType(desc).getReturnType();
-            if (owner.contains("FileInputStream") && name.contains("read")) {
-                visitFieldInsn(Opcodes.GETSTATIC, "java/lang/System", "out", "Ljava/io/PrintStream;");
-                visitLdcInsn("GOT IT!");
-                visitMethodInsn(Opcodes.INVOKEVIRTUAL, "java/io/PrintStream", "println", "(Ljava/lang/String;)V", false);
-            }
+            Type ownerType = Type.getObjectType(owner);
+            try {
+                Class ret;
+                Class own = Class.forName(ownerType.getClassName());
+                if (returnType.equals(Type.VOID_TYPE) && opcode == Opcodes.INVOKESPECIAL && name.equals("<init>")) {
+                    if (InputStream.class.isAssignableFrom(own)) {
+                        super.visitMethodInsn(opcode, owner, name, desc, itfc);
+                        //super.visitMethodInsn(Opcodes.INVOKESTATIC, Type.getInternalName(ReplayUtils.class), "wrap", "(Ljava/io/InputStream;)Ljava/io/InputStream;", false);
+                        //super.visitTypeInsn(CHECKCAST, ownerType.getInternalName());
+                        classesToGenerate.add(ownerType);
+                        System.out.println("CONSTRUCTOR");
+                        return;
+                    }
+                }
+                ret = Class.forName(returnType.getClassName());
+                if (InputStream.class.isAssignableFrom(ret)) {
+                    super.visitMethodInsn(opcode, owner, name, desc, itfc);
+                    super.visitMethodInsn(Opcodes.INVOKESTATIC, Type.getInternalName(ReplayUtils.class), "wrap", "(Ljava/io/InputStream;)Ljava/io/InputStream;", false);
+                    super.visitTypeInsn(CHECKCAST, returnType.getInternalName());
+                    classesToGenerate.add(returnType);
+                    System.out.println("HERE");
+                    return;
+                }
+
+            } catch (Exception e) {}
+//            if (owner.contains("FileInputStream") && name.contains("read")) {
+//                visitFieldInsn(Opcodes.GETSTATIC, "java/lang/System", "out", "Ljava/io/PrintStream;");
+//                visitLdcInsn("GOT IT!");
+//                visitMethodInsn(Opcodes.INVOKEVIRTUAL, "java/io/PrintStream", "println", "(Ljava/lang/String;)V", false);
+//            }
             if ((!constructor || isFirstConstructor || superInitialized)
                     && !returnType.equals(Type.VOID_TYPE)
                     && nonDeterministicMethods.contains(owner + "." + name + ":" + desc)
